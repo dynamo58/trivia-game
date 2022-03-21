@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/styles/main.css">
+	<title>Okayeg</title>
+</head>
+<body>
+	<div id="modal" class="modal">
+		<div class="modalContentWrapper">
+			<div id="modalContent" class="modalContent">
+				<p>Create your brand new room!</p>
+				<form autocomplete="off">
+					<input
+						type="text"
+						autocomplete="false"
+						name="roomName"
+					>
+					<label for="roomName">Room name</label>
+					<br><br>
+					<input
+						type="password"
+						autocomplete="false"
+						name="roomPassword"
+					>
+					<label for="roomPassword">Room password (optional)</label>
+					<br><br><br>
+					<input
+						type="submit"
+						value="Create room"
+						class="btn"
+						id="createRoomSubmitBtn"
+					>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<nav>
+		<div id="createRoom" class="navbar__item">Create room</div>
+		<a href="/"><div class="navbar__item">Tutorial</div></a>
+		<div id="joinRoom" class="navbar__item">Join room</div>
+	</nav>
+
+	<script>
+		const $ = (r) => document.getElementById(r);
+
+		const modal = $("modal");
+		const modalContent = $("modalContent");
+
+		const createRoomModalContent = `
+			
+		`;
+
+		window.onclick = function(event) {
+			if (event.target == $("createRoom")) {
+				modal.style.display = "block";
+			} else if (event.target == modal && modal.style.display == "block") {
+				modal.style.display = "none";
+			}
+		}
+	</script>
+
+	<main>
+		<h1 class="article__section__heading">TeaTime Okayeg</h1>
+
+		<p>
+			Už přišla, už se chumelila, na duby pověsil se sníh, přes vrchy lehla v pole bílá v zvlněných, bílých kobercích. Už přišla, břehy vyrovnala s řekou, jež ochrnuta stála. Mráz uhodil. A každý rád má žerty matky zimy snad, jen Taťána je plna bázně. Ne, letos zimu nevítá, svůj dech na mrazu nechytá a prvním sněhem ze střech lázně tvář, hruď, ramena nemyje. Takový v ní strach z cesty je.
+		</p>
+
+		<div class="img_wrapper">
+			<img src="/img/floppadank.webp" alt="">
+			<span>7tv @floppaDank</span>
+		</div>
+		
+		<p>
+		Už minul den, kdy vyjet měli, už věru nejvyšší byl čas. Dalo to práci, zrezavělý vůz překovat a spravit zas. Tři kibitky, tak jezdívali, tvořily oboz dokonalý: matrace, židle, peřiny, kastroly, zavařeniny, truhly, posady na kuřata a hrnce, hojnost nádobí i všelijaké zásoby. Ven z jizeb služebnictvo chvátá a všude šum a pláč má vrch, už vedou na dvůr osmnáct mrch,
+		</p>
+
+		<div class="img_wrapper">
+			<img src="/img/lol.webp" alt="">
+			<span>7tv @lol</span>
+		</div>
+
+		<p>
+			v bojarské saně zapřahají, snídani nesou ze dveří a vozy div že nepraskají a služky, kočí láteří. Už usadil se na kobyle vousatý štolba. Slavná chvíle loučení s pány přišla teď pro celý statek, pro čeleď. Konečně! Tíha povolila, už zvoní ze vrat podkova. „Nuž sbohem, klide domova, nuž sbohem, zákoutí má milá, kdy uzřím vás?“ A Táňa má si stírá slzy rukama.
+		</p>
+
+		<div class="img_wrapper">
+			<img src="/img/weirdga.webp" alt="">
+			<span>7tv @weirdga</span>
+		</div>
+
+		<p>
+			Teď naše cesty, chátrajíce, pozvolna hnijou, mosty též. A ve stanicích pro štěnice zamhouřit oka nemůžeš. Hospody nikde. Na stanici sic pyšně visí ve světnici, na oko pouze, seznam cen, však marně chuť nám dráždí jen, zatím co kyklopové naši v kováren selských odlesku evropskou léčí kolesku, jež ruské cesty těžce snáší, a Pána Boha prosí dál, by cesty spravit nenechal.
+		</p>
+
+		<p>
+			Leč zato v zimě! Mrazík tenký dal do pořádku silnice. Jak módní verše bez myšlenky je hladká zimní sanice. Náš Automedon si jen hvízdá, jak ubíhá mu v trojce jízda, a versty se nám kmitají jak ploty na cest okraji. Než Larinovy na neštěstí nejely poštou, šetříce; už týden sněhem silnice si jejich herky cestu klestí a Táňa naše unylá se dokonale znudila.
+		</p>
+	</main>
+
+	<footer>
+
+	</footer>
+</body>
+</html>

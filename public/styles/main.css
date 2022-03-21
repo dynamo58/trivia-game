@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css?family=Trykker&display=swap');
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	color: #fff;
+	background-color: #252525;
+	font-size: 1.125rem;
+}
+
+main {
+	margin: 3em auto;
+	width: min(1024px, 100vw);
+	padding: 1em;
+}
+
+a,
+a:visited {
+	color: #fff;
+	text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+.navbar__item {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+nav {
+	display: flex;
+	justify-content: center;
+	padding: 1em 0;
+	background-color: #303030;
+}
+
+.navbar__item {
+	margin: 0 3em;
+	padding: 0.1em;
+	font-size: 1.25em;
+}
+
+.navbar__item:hover {
+	cursor: pointer;
+}
+
+.navbar__item:hover {
+	color: rgb(68, 218, 255);
+	transition: all linear 0.15s;
+}
+
+p {
+	font-family: 'Trykker', serif;
+}
+
+.article__section__heading {
+	margin-left: 3em;
+}
+
+.img_wrapper {
+	margin: 1em auto;
+	text-align: center;
+}
+
+.img_wrapper img {
+	margin: 0 auto;
+	display: block;
+}
+
+.img_wrapper span {
+	display: inline-block;
+	margin: 0.3em;
+	padding: 0.3em 1em;
+	background: rgb(29,19,57);
+	background: linear-gradient(42deg, rgba(29,19,57,0.15) 0%, rgba(9,9,121,0.15) 27%, rgba(0,212,255,0.15) 100%);
+	border-bottom: 1px solid rgb(50, 157, 184);
+	border-radius: .7em;
+}
+
+.modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+  	z-index: 1;
+  	overflow: auto;
+	background-color: #303030aa;
+}
+	
+.modalContentWrapper {
+	width: min(764px, 100vw);
+	margin: min(100px, 10vw) auto;
+	border-radius: 2em;
+	background: rgb(29,19,57);
+	background: linear-gradient(42deg, rgba(29,19,57,1) 0%, rgba(9,9,121,1) 27%, rgba(0,212,255,1) 100%);
+}
+
+.modalContent {
+	padding: 2em;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+input {
+	padding: .3em;
+	font-size: .9em;
+	border-radius: 0.3em;
+}
+
+label {
+	user-select: none;
+}
+
+.btn,
+.btn:focus {
+	background: rgb(255,134,0);
+	background: linear-gradient(42deg, rgba(255,134,0,1) 4%, rgba(9,101,121,1) 48%, rgba(19,42,57,1) 91%);
+	color: #fff;
+	outline: none !important;
+	border: none;
+	cursor: pointer;
+}
