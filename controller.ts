@@ -25,18 +25,18 @@ export const game = async (c: Context) => {
 }
 
 // WebSockets
-// export const socket: HandlerFunc = async (c: Context) => {
-// 	const { emoteName } = c.params;
-// 	const { conn, headers, r: bufReader, w: bufWriter } = c.request;
-//   	const ws = await acceptWebSocket({
-// 		conn,
-// 		headers,
-// 		bufReader,
-// 		bufWriter,
-// 	});
+export const socket = async (c: Context) => {
+	const { emoteName } = c.params;
+	const { conn, headers, r: bufReader, w: bufWriter } = c.request;
+  	const ws = await acceptWebSocket({
+		conn,
+		headers,
+		bufReader,
+		bufWriter,
+	});
 
-// 	for await (const e of ws) {
-// 		console.log(e);
-// 		await ws.send("Hello, Client!");
-// 	}
-// }
+	for await (const e of ws) {
+		console.log(e);
+		await ws.send("Hello, Client!");
+	}
+}
