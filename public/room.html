@@ -7,10 +7,29 @@
 	<title>Room</title>
 </head>
 <body>
+	<p id="output"></p>
 	<script>
-		let room_id = window.location.toString().split("/")[window.location.toString().split("/").length-1];
-		let ws = new WebSocket("ws://localhost:3003/room");
+		const loc = window.location;
+		const room_id = loc.toString().split("/")[loc.toString().split("/").length-1];
+		let uri = "ws:";
+		if (loc.protocol === "https:") { 
+			uri = "wss:"; 
+		}
+		
+		uri += "//" + loc.host;
+		uri += "/ws/" + room_id;
+		console.log(uri);
+		const ws = new WebSocket(uri);
+		ws.onopen = function () {
+			console.log("Connected");
+		}
+		
+		ws.onmessage = function (evt) {
+			let out = document.getElementById("output");
+			out.innerHTML += evt.data + "<br>";
+		}
+		
+		setInterval(function () { ws.send("Hello, Server!"); }, 1000); 
 	</script>
-	<!-- https://youtu.be/Cb8zho9HDbk?t=126 -->
 </body>
 </html>
