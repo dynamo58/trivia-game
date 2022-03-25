@@ -1,24 +1,27 @@
-import {
-    Room
-} from "models.ts";
-
-export function Room(
-    p1:   string,
-    p2:   string,
-    name: string,
-    pw:   string | null,
-): Room | string  {
-    if (!is_room(name)) {
-        return {
-            player1:  p1,
-            player2:  p2,
-            name:     name,
-            password: pw,
-        }
-    }
-
-    return "Room already exists.";
+export interface Room {
+	player1: string | null,
+	player2: string | null,
+	name: string,
+	password: string | null,
 }
+
+// export function Room(
+//     p1:   string,
+//     p2:   string,
+//     name: string,
+//     pw:   string | null,
+// ): Room | string  {
+//     if (!is_room(name)) {
+//         return {
+//             player1:  p1,
+//             player2:  p2,
+//             name:     name,
+//             password: pw,
+//         }
+//     }
+
+//     return "Room already exists.";
+// }
 
 export function is_room(
     rooms: Room[],
@@ -32,7 +35,3 @@ export function is_room(
 
     return false;
 }
-
-
-
-
