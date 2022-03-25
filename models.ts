@@ -1,9 +1,11 @@
-export interface User {
-	
-}
+// export interface User {
+// 	name: string,
+// }
 
 export interface Room {
-	owner: User,
+	player1: string | null,
+	player2: string | null,
 	name: string,
-	password?: string,
+	password: string | null,
 }
+

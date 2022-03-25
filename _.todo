@@ -1,0 +1,10 @@
+This is a project I am using to learn Deno, so here might be some miscellaneous stuff
+
+- node -> Deno
+	https://aralroca.com/blog/from-node-to-deno
+
+- ts playground
+	https://www.typescriptlang.org/play?#code
+
+- explore
+	https://deno.land/manual@v1.20.1/runtime/ffi_api

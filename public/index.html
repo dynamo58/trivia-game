@@ -10,38 +10,13 @@
 <body>
 	<div id="modal" class="modal">
 		<div class="modalContentWrapper">
-			<div id="modalContent" class="modalContent">
-				<p>Create your brand new room!</p>
-				<form autocomplete="off">
-					<input
-						type="text"
-						autocomplete="false"
-						name="roomName"
-					>
-					<label for="roomName">Room name</label>
-					<br><br>
-					<input
-						type="password"
-						autocomplete="false"
-						name="roomPassword"
-					>
-					<label for="roomPassword">Room password (optional)</label>
-					<br><br><br>
-					<input
-						type="submit"
-						value="Create room"
-						class="btn"
-						id="createRoomSubmitBtn"
-					>
-				</form>
-			</div>
 		</div>
 	</div>
 
 	<nav>
 		<div id="createRoom" class="navbar__item">Create room</div>
 		<a href="/"><div class="navbar__item">Tutorial</div></a>
-		<div id="joinRoom" class="navbar__item">Join room</div>
+		<div id="browseRooms" class="navbar__item">Browse rooms</div>
 	</nav>
 
 	<script>
@@ -50,13 +25,59 @@
 		const modal = $("modal");
 		const modalContent = $("modalContent");
 
-		const createRoomModalContent = `
-			
+		const CREATE_ROOM_MODAL_CONTENT = `
+			<p>Create your brand new room!</p>
+			<form autocomplete="off">
+				<input
+					type="text"
+					autocomplete="false"
+					name="roomName"
+				>
+				<label for="roomName">Room name</label>
+				<br><br>
+				<input
+					type="password"
+					autocomplete="false"
+					name="roomPassword"
+				>
+				<label for="roomPassword">Room password (optional)</label>
+				<br><br><br>
+				<input
+					type="submit"
+					value="Create room"
+					class="btn"
+					id="createRoomSubmitBtn"
+				>
+			</form>
 		`;
 
-		window.onclick = function(event) {
+		const BROWSE_ROOMS_MODAL_CONTENT = `
+			<div id="modalContent" class="modalContent">
+				<div id="rooms" class="rooms"></div>
+			</div>
+		`;
+
+		async function refresh_rooms() {
+			let el = $("rooms");
+			el.innerHTML = "";
+
+			let rooms = await fetch("/api/rooms");
+
+			for (let room of rooms) {
+				el.innerHTML += `<div>${room.name}</div>`;
+			}
+		}
+
+		window.onclick = async function(event) {
 			if (event.target == $("createRoom")) {
+				modalContent.innerHTML = CREATE_ROOM_MODAL_CONTENT;
 				modal.style.display = "block";
+
+			} else if (event.target == $("browseRooms")) {
+				modalContent.innerHTML = CREATE_ROOM_MODAL_CONTENT;
+				await refresh_rooms();
+				modal.style.display = "block";
+
 			} else if (event.target == modal && modal.style.display == "block") {
 				modal.style.display = "none";
 			}
