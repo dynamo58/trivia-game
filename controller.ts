@@ -1,6 +1,6 @@
 import { Context } from 'https://deno.land/x/abc@v1.3.3/mod.ts';
 import { v4 } from "https://deno.land/std/uuid/mod.ts"
-import { Room, is_room } from "./lib.ts";
+import { Player, Room, is_room } from "./lib.ts";
 
 export const getEmote = async (c: Context) => {
 	const { emoteName } = c.params;
@@ -38,15 +38,26 @@ import { acceptWebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/den
 // all the variants as which one can
 // join a room
 enum Participant {
-	Player1,
-	Player2,
-	Spectator,
+	Player1 = "player1",
+	Player2 = "player2",
+	Spectator = "spectator",
 }
 
 export const socket = async (
 	c:     Context,
 	rooms: Room[],
 ) => {
+	const a = c.response.body;
+	console.log({a});
+	const body = (await c.body);
+	console.log({body});
+
+	// const body = await c.body;
+    // if (!Object.keys(body).length) {
+    //   return c.string("Request can't be empty", 400);
+    // }
+    // const { password } = body;
+
 	const {
 		conn,
 		headers,
@@ -60,7 +71,7 @@ export const socket = async (
 		bufWriter,
 	});
 
-	let user_type = Participant.Spectator;
+	let userType: Participant = Participant.Spectator;
 
 	for await (const e of ws) {
 		const data = JSON.parse(e.toString());
@@ -69,19 +80,30 @@ export const socket = async (
 			case "join":
 				let room = is_room(rooms, data.roomId);
 				if (room) {
-					// if (room.password)
-					ws.send(JSON.stringify({
-						action: "joinAnswer",
-						success: true,
-						roomState: {
-							player1:      room.player1,
-							player2:      room.player2,
-							player1Score: room.player1Score,
-							player2Score: room.player2Score,
-							name:         room.name
-						}
-					}));
+					if (room.player1 == null) {
+						userType = Participant.Player1;
+						if (data.nickname && typeof data.nikname)
+							room.player1 = new Player(data.nickname);
+					}
+					else if (room.player2 == null) {
+						userType = Participant.Player2;
+						if (data.nickname && typeof data.nikname)
+							room.player2 = new Player(data.nickname);
+					}
+					else
+						userType = Participant.Spectator;
 				}
+					// if (room.password)
+				ws.send(JSON.stringify({
+					action: "joinAnswer",
+					success: !!room,
+					role: userType,
+					roomState: (room) ? {
+						player1:      room.player1,
+						player2:      room.player2,
+						name:         room.name
+					} : null
+				}));
 				break;
 		}
 

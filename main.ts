@@ -9,8 +9,8 @@ const app = new Application();
 app.static("/", "./public");
 
 let rooms: Room[] = [
-	new Room("test_player1", "test_player2", "test_room1", null),
-	new Room("test_player3", "test_player4", "test_room2", null),
+	new Room("test_room1", null),
+	new Room("test_room2", null),
 ];
 
 import {

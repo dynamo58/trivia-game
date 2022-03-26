@@ -70,7 +70,6 @@ function joinRoom(s) {
 }
 
 function refreshRoomData(roomState) {
-	console.log(roomState);
 	player1name.innerText  = roomState.player1.name;
 	player1score.innerText = roomState.player1.score;
 	player2name.innerText  = roomState.player2.name;

@@ -1,4 +1,5 @@
-class Player {
+// represents a player in a lobby
+export class Player {
     public nickname: string;
     public score:    number;
 
@@ -13,23 +14,17 @@ class Player {
 export class Room {
 	public player1:      Player | null;
 	public player2:      Player | null;
-	public player1Score: number;
-	public player2Score: number;
 	public name:         string;
 	password:            string | null;
 
     constructor(
-        p1:   string,
-        p2:   string,
         name: string,
         pw:   string | null,
     ) {
-        this.player1      = new Player(p1);
-        this.player2      = new Player(p2);
-        this.player1Score = 0;
-        this.player2Score = 0;
-        this.name         = name;
-        this.password     = pw;
+        this.player1  = null;
+        this.player2  = null;
+        this.name     = name;
+        this.password = pw;
     }
 }
 
