@@ -1,7 +1,6 @@
 import { Application } from "https://deno.land/x/abc@v1.3.3/mod.ts";
 import { Context } from "https://deno.land/x/abc@v1.3.3/mod.ts";
-import { Room, is_room } from "./lib.ts";
-
+import { Room } from "./lib.ts";
 
 const PORT: number = 3000;
 
@@ -14,20 +13,22 @@ let rooms: Room[] = [
 ];
 
 import {
-	// createRoom,
+	createRoom,
 	getRooms,
-	getEmote,
 	getHome,
 	getRoom,
 	socket,
 } from "./controller.ts";
 
 app
+	// frontend
 	.get("/", getHome)
 	.get("/home", getHome)
-	.get("/api/rooms", getRooms)
 	.get("/room/:roomId", getRoom)
-	.get("emotes/:emoteName", getEmote)
+	// api (called from frontend JS)
+	.get("/api/rooms",       (c: Context) => getRooms(c, rooms))
+	.post("/api/createRoom", (c: Context) => createRoom(c, rooms))
+	// ws
 	.get("/ws/:roomId", (c: Context) => socket(c, rooms))
 	.start({ port: PORT });
 

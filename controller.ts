@@ -1,6 +1,7 @@
 import { Context } from 'https://deno.land/x/abc@v1.3.3/mod.ts';
 import { v4 } from "https://deno.land/std/uuid/mod.ts"
-import { Player, Room, is_room } from "./lib.ts";
+import { Player, Participant, Room, is_room, println } from "./lib.ts";
+import { acceptWebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
 
 export const getEmote = async (c: Context) => {
 	const { emoteName } = c.params;
@@ -11,9 +12,14 @@ export const getHome = async (c: Context) => {
     return c.file("public/index.html");
 }
 
-export const getRooms = async (c: Context) => {
+export const getRooms = async (c: Context, rooms: Room[]) => {
 	return JSON.stringify({
-		
+		status: 200,
+		rooms: rooms.map(room => ({
+			player1: room.player1,
+			player2: room.player2,
+			name: room.name,
+		})),
 	});
 }
 
@@ -21,42 +27,38 @@ export const getRoom = async (c: Context) => {
     return c.file("public/room.html");
 }
 
-export const joinRoom = async (c: Context) => {
-	
-}
+export const createRoom = async (c: Context, rooms: Room[]) => {
+	const {
+		roomName,
+		roomPassword
+	} = await c.body as {
+		roomName: string,
+		roomPassword: string | null
+	};
 
-export const createRoom = async (c: Context) => {
-	
-}
+	// check again if the requirements are met
+	if (roomName && !roomName.includes(" ")) {
+		rooms.push(new Room(roomName, roomPassword));
+		await println(`New room \`${roomName}\` created`);
 
-export const game = async (c: Context) => {
-	
-}
-
-import { acceptWebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
-
-// all the variants as which one can
-// join a room
-enum Participant {
-	Player1 = "player1",
-	Player2 = "player2",
-	Spectator = "spectator",
+		return JSON.stringify({
+			status: 200,
+			message: "Room created successfully",
+			roomLocation: `/room/${roomName}`,
+		});
+	} else {
+		return JSON.stringify({
+			status: 400,
+			message: "Bad request",
+		})
+	}
 }
 
 export const socket = async (
 	c:     Context,
 	rooms: Room[],
 ) => {
-	const a = c.response.body;
-	console.log({a});
-	const body = (await c.body);
-	console.log({body});
-
-	// const body = await c.body;
-    // if (!Object.keys(body).length) {
-    //   return c.string("Request can't be empty", 400);
-    // }
-    // const { password } = body;
+	const { roomPassword } = await c.body as { roomPassword: string };
 
 	const {
 		conn,
@@ -79,7 +81,7 @@ export const socket = async (
 		switch (data.action) {
 			case "join":
 				let room = is_room(rooms, data.roomId);
-				if (room) {
+				if (room && room.password === roomPassword) {
 					if (room.player1 == null) {
 						userType = Participant.Player1;
 						if (data.nickname && typeof data.nikname)
@@ -93,15 +95,15 @@ export const socket = async (
 					else
 						userType = Participant.Spectator;
 				}
-					// if (room.password)
+
 				ws.send(JSON.stringify({
 					action: "joinAnswer",
 					success: !!room,
 					role: userType,
 					roomState: (room) ? {
-						player1:      room.player1,
-						player2:      room.player2,
-						name:         room.name
+						player1: room.player1,
+						player2: room.player2,
+						name:    room.name
 					} : null
 				}));
 				break;

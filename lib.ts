@@ -1,3 +1,6 @@
+export const println = async (s: string) => 
+    await Deno.stdout.write(new TextEncoder().encode(`${s}\n`));
+
 // represents a player in a lobby
 export class Player {
     public nickname: string;
@@ -28,16 +31,24 @@ export class Room {
     }
 }
 
+// all the variants as which one can
+// join a room
+export enum Participant {
+	Player1 = "player1",
+	Player2 = "player2",
+	Spectator = "spectator",
+}
+
 // checks `Room` array for a room with a specific name
 // if no such `Room` is found, returns `false`
 // if such `Room` is found, returns it
 //      (which can be autoconverted to `true`)
 export function is_room(
     rooms: Room[],
-    room_name: string
+    roomName: string
 ): Room | false {
     for (let room of rooms) {
-        if (room.name === room_name)
+        if (room.name === roomName)
             return room;
     }
 

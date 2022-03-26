@@ -29,6 +29,7 @@ h2,
 h3,
 .navbar__item {
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	color: #FFBBEC;
 }
 
 nav {
@@ -75,9 +76,8 @@ p {
 	display: inline-block;
 	margin: 0.3em;
 	padding: 0.3em 1em;
-	background: rgb(29,19,57);
-	background: linear-gradient(42deg, rgba(29,19,57,0.15) 0%, rgba(9,9,121,0.15) 27%, rgba(0,212,255,0.15) 100%);
-	border-bottom: 1px solid rgb(50, 157, 184);
+	/* background-image: linear-gradient(180deg, #A9C9FF77, #FFBBEC77); */
+	border-bottom: 1px solid #FFBBEC;
 	border-radius: .7em;
 }
 
@@ -98,7 +98,7 @@ p {
 	margin: min(100px, 10vw) auto;
 	border-radius: 2em;
 	background: rgb(29,19,57);
-	background: linear-gradient(42deg, rgba(29,19,57,1) 0%, rgba(9,9,121,1) 27%, rgba(0,212,255,1) 100%);
+	background-image: linear-gradient(180deg, #A9C9FF55, #FFBBEC55);
 }
 
 .modalContent {
@@ -118,10 +118,20 @@ label {
 
 .btn,
 .btn:focus {
-	background: rgb(255,134,0);
-	background: linear-gradient(42deg, rgba(255,134,0,1) 4%, rgba(9,101,121,1) 48%, rgba(19,42,57,1) 91%);
+	background-image: linear-gradient(270deg, #A9C9FF, #FFBBEC);
 	color: #fff;
 	outline: none !important;
 	border: none;
 	cursor: pointer;
+}
+
+.roomBadge {
+	padding: 1em .5em;
+	margin: 1em auto;
+	text-align: center;
+	font-size: 1.2em;
+	font-weight: 600;
+	border: 4px solid #FFBBEC;
+	border-radius: 3em;
+	background-image: linear-gradient(270deg, #A9C9FF77, #FFBBEC77);
 }

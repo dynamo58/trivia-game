@@ -48,7 +48,6 @@ ws.onopen = () => {
 ws.onmessage = (evt) => {
 	try {
 		const data = JSON.parse(evt.data);
-		console.log(data);
 		switch (data.action) {
 			case "joinAnswer":
 				if (data.success) {
@@ -70,9 +69,9 @@ function joinRoom(s) {
 }
 
 function refreshRoomData(roomState) {
-	player1name.innerText  = roomState.player1.name;
+	player1name.innerText  = roomState.player1.nickname;
 	player1score.innerText = roomState.player1.score;
-	player2name.innerText  = roomState.player2.name;
+	player2name.innerText  = roomState.player2.nickname;
 	player2score.innerText = roomState.player2.score;
 }
 
