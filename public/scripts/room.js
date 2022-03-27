@@ -44,7 +44,7 @@ ws.onopen = () => {
 	joinRoom(nick);
 }
 
-ws.onmessage = (evt) => {
+ws.onmessage = async (evt) => {
 	try {
 		const data = JSON.parse(evt.data);
 		console.log(data);
@@ -57,15 +57,12 @@ ws.onmessage = (evt) => {
 				break;
 				
 			case "gameStarting":
-				const announce_sound = new Audio("/sounds/game_starting.mp3");
-				const start_sound    = new Audio("/sounds/game_started.mp3");
-
-				currentEvent.innerText = "Game is shortly starting, get ready!";
+				currentEvent.innerText = "Game is starting shortly, get ready!";
 			
-				announce_sound.play();
+				playSound("/sounds/game_starting.mp3");
 				
-				runTimedProgressBar("10s", function () {
-					start_sound.play();
+				runTimedProgressBar("10s", async function () {
+					playSound("/sounds/game_started.mp3");
 				});
 				break;
 			
@@ -123,6 +120,17 @@ function runTimedProgressBar(duration, cb) {
 	bar.addEventListener('animationend', cb);
 	bar.style.animationDuration = duration;
 	bar.style.animationPlayState = 'running';
+}
+
+function playSound(url){
+	let audio = document.createElement('audio');
+	audio.style.display = "none";
+	audio.src = url;
+	audio.autoplay = true;
+	audio.onended = function(){
+	  	audio.remove() //Remove when played.
+	};
+	document.body.appendChild(audio);
 }
 
 // setInterval(function () { ws.send("Hello, Server!"); }, 1000);

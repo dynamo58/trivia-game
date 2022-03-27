@@ -2,6 +2,7 @@ import { Context } from 'https://deno.land/x/abc@v1.3.3/mod.ts';
 import { v4 } from "https://deno.land/std@0.132.0/uuid/mod.ts";
 import { Player, Participant, Room, is_room, println } from "./lib.ts";
 import { acceptWebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
+import { sleep } from "https://deno.land/x/sleep/mod.ts";
 
 export const getEmote = async (c: Context) => {
 	const { emoteName } = c.params;
@@ -74,16 +75,18 @@ export const socket = async (
 	});
 
 	const _uuid = v4.generate();
-
+	let _logged: boolean = false;
+	let _nickname: string | null = null;
+	let _room: Room | null = null;
 	let userType: Participant = Participant.Spectator;
 
 	for await (const e of ws) {
 		try {
-			console.log(e)
 			const data = JSON.parse(e.toString());
 
 			switch (data.action) {
 				case "join":
+					let joined_as_player = false;
 					let errors: string[] = [];
 
 					let room = is_room(rooms, data.roomId);
@@ -92,29 +95,31 @@ export const socket = async (
 						(room.password === null || roomPassword === room.password) &&
 						(!!data.nickname)
 					) {
-						if (room.password === null || roomPassword === room.password) {
-							if (room.player1 == null) {
-								userType = Participant.Player1;
-								if (data.nickname && typeof data.nickname)
-									room.player1 = new Player(data.nickname);
-							}
-							else if (room.player2 == null) {
-								userType = Participant.Player2;
-								if (data.nickname && typeof data.nickname)
-									room.player2 = new Player(data.nickname);
-							}
-							else
-								userType = Participant.Spectator;
-							
-							room.sockets.set(_uuid, ws);
+						_logged = true;
+						_room = room;
+						_nickname = data.nickname;
 
-							for (const [_, socket] of room.sockets.entries()) {
-								socket.send(JSON.stringify({
-									action: "someoneJoined",
-									type: userType,
-									nickname: data.nickname,
-								}))
-							}
+						if (room.player1 == null) {
+							userType = Participant.Player1;
+							room.player1 = new Player(data.nickname);
+							joined_as_player = true;
+						}
+						else if (room.player2 == null) {
+							userType = Participant.Player2;
+							room.player2 = new Player(data.nickname);
+							joined_as_player = true;
+						}
+						else
+							userType = Participant.Spectator;
+						
+						room.sockets.set(_uuid, ws);
+
+						for (const [_, socket] of room.sockets.entries()) {
+							socket.send(JSON.stringify({
+								action: "someoneJoined",
+								type: userType,
+								nickname: data.nickname,
+							}));
 						}
 					}
 
@@ -125,7 +130,7 @@ export const socket = async (
 
 					ws.send(JSON.stringify({
 						action: "joinAnswer",
-						success: !!room && !!data.nickname,
+						success: room && !!data.nickname,
 						error: (!!data.nickname) ? null : "",
 						role: userType,
 						roomState: (room) ? {
@@ -134,10 +139,46 @@ export const socket = async (
 							name:    room.name
 						} : null,
 					}));
+
+					if (joined_as_player) {
+						if (room) {
+							if (room.player1 && room.player2) {
+								await ongoingGameHandler(room);
+							}
+						}
+					}
 					break;
 			}
 		} catch {}
 	}
 	
-	console.log("he disconnected");
+	if (_room && _nickname) {
+		_room.sockets.delete(_uuid);
+
+		switch (userType) {
+			case Participant.Player1:
+				_room.player1 = null;
+				break;
+			case Participant.Player2:
+				_room.player2 = null;
+				break;
+			case Participant.Spectator:
+				const index = _room.spectators.indexOf(_nickname);
+				if (index !== -1)
+					_room.spectators.splice(index, 1);
+				break;
+		}
+		// console.log("he disconnected");
+		console.log(_room);
+	}
+}
+
+async function ongoingGameHandler(room: Room) {
+	for (const [_, socket] of room.sockets.entries()) {
+		socket.send(JSON.stringify({
+			action: "gameStarting",
+		}));
+	}
+
+	await sleep(5);
 }

@@ -17,6 +17,11 @@
 	color: #ffbbec;
 }
 
+#spectators {
+	user-select: none;
+	padding: .3em 2em;
+}
+
 .gameField {
 	width: min(1024px, 100vw);
 	margin: 5em auto;
@@ -31,6 +36,7 @@
 	text-align: center;
 	font-weight: 500;
 	font-size: 1.2em;
+	user-select: none;
 }
 
 .questionFields div {

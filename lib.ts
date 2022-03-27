@@ -21,6 +21,7 @@ export class Room {
 	public player2:      Player | null;
 	public name:         string;
     public sockets:      Map<string, WebSocket>;
+    public spectators:   string[];
 	password:            string | null;
 
 
@@ -33,6 +34,7 @@ export class Room {
         this.name     = name;
         this.password = pw;
         this.sockets  = new Map();
+        this.spectators = [];
     }
 }
 

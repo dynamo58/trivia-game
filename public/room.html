@@ -22,35 +22,36 @@
 		<div id="browseRooms" class="navbar__item">Browse rooms</div>
 	</nav>
 
-	<div class="game_field">
-		<div class="playerStatus">
-			<div class="playerStatus__player1">
-				<div class="playerName" id="player1Name">No one joined yet</div>
-				<div class="playerScore" id="player1Score">0</div>
-			</div>
-			<div class="playerStatus__player2">
-				<div class="playerName" id="player2Name">No one has joined yet</div>
-				<div class="playerScore" id="player2Score">0</div>
-			</div>
+	<div class="playerStatus">
+		<div class="playerStatus__player1">
+			<div class="playerName" id="player1Name">No one joined yet</div>
+			<div class="playerScore" id="player1Score">0</div>
 		</div>
-		<div class="gameField">
-			<div class="question">
-				<div id="questionQuestion">In programming, the ternary operator is mostly defined with what symbol(s)?</div>
-				<div class="questionFields">
-					<div class="questionField" id="questionField1">?:</div>
-					<div class="questionField" id="questionField2">??</div>
-					<div class="questionField" id="questionField3">?</div>
-					<div class="questionField" id="questionField4">if then</div>
-				</div>
-			</div>
+		<div class="playerStatus__player2">
+			<div class="playerName" id="player2Name">No one has joined yet</div>
+			<div class="playerScore" id="player2Score">0</div>
 		</div>
+	</div>
 
-		<div class="gameStatus">
-			<div id="currentEvent">Waiting for players to join</div>
-			<div class="loaderWrapper">
-				<div class="loaderBg">
-					<div id="loader"></div>
-				</div>
+	<div id="spectators"><span style="font-weight: bold;">Spectators</span>: </div>
+
+	<div class="gameField">
+		<div class="question">
+			<div id="questionQuestion">In programming, the ternary operator is mostly defined with what symbol(s)?</div>
+			<div class="questionFields">
+				<div class="questionField" id="questionField1">?:</div>
+				<div class="questionField" id="questionField2">??</div>
+				<div class="questionField" id="questionField3">?</div>
+				<div class="questionField" id="questionField4">if then</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="gameStatus">
+		<div id="currentEvent">Waiting for players to join</div>
+		<div class="loaderWrapper">
+			<div class="loaderBg">
+				<div id="loader"></div>
 			</div>
 		</div>
 	</div>
