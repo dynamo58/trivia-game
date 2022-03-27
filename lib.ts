@@ -1,3 +1,5 @@
+import { WebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
+
 export const println = async (s: string) => 
     await Deno.stdout.write(new TextEncoder().encode(`${s}\n`));
 
@@ -18,7 +20,9 @@ export class Room {
 	public player1:      Player | null;
 	public player2:      Player | null;
 	public name:         string;
+    public sockets:      Map<string, WebSocket>;
 	password:            string | null;
+
 
     constructor(
         name: string,
@@ -28,6 +32,7 @@ export class Room {
         this.player2  = null;
         this.name     = name;
         this.password = pw;
+        this.sockets  = new Map();
     }
 }
 

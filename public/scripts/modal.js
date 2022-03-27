@@ -1,5 +1,3 @@
-const $ = (r) => document.getElementById(r);
-
 const modal = $("modal");
 const modalContent = $("modalContent");
 

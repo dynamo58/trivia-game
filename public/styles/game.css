@@ -1,0 +1,126 @@
+.playerStatus {
+	display: flex;
+	justify-content: space-around;
+	font-size: 1.125em;
+	padding: .5em 0;
+	background-color: #404040;
+	user-select: none;
+}
+
+.playerName {
+	font-style: italic;
+	font-weight: bold;
+}
+
+.playerScore,
+.questionField {
+	color: #ffbbec;
+}
+
+.gameField {
+	width: min(1024px, 100vw);
+	margin: 5em auto;
+	border: 3px solid #fff;
+	background: #303030;
+	border-radius: 2em;
+}
+
+#questionQuestion {
+	margin: 1em;
+	width: 100%;
+	text-align: center;
+	font-weight: 500;
+	font-size: 1.2em;
+}
+
+.questionFields div {
+	width: 50%;
+	text-align: center;
+	padding: 1em 0;
+}
+
+.questionFields div:hover {
+	background-color: #FFBBEC55;
+	cursor: pointer;
+}	
+
+.questionField:nth-last-child(2) {
+	border-bottom-left-radius: 2em;
+}
+
+.questionField:nth-last-child(1) {
+	border-bottom-right-radius: 2em;
+}
+
+@media only screen and (max-width: 500px) {
+	.questionFields div {
+		width: 100% !important;
+	}
+
+	.questionField:nth-last-child(2) {
+		border-bottom-left-radius: 0;
+	}
+
+	.questionField:nth-last-child(1) {
+		border-bottom-right-radius: 2em;
+		border-bottom-left-radius: 2em;
+	}
+}
+
+.questionFields {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	flex-wrap: wrap;
+}
+
+.questionField {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#currentEvent {
+	width: 100%;
+	text-align: center;
+	font-size: 1.125em;
+	font-style: italic;
+}
+
+
+.loaderWrapper {
+	width: 100%;
+	
+}
+
+.loaderWrapper {
+	width: 100%;
+	margin-top: 1em;
+}
+
+.loaderBg {
+	border-radius: 1em;
+	width: 75%;
+	margin: 0 auto;
+	background: #303030;
+}
+
+#loader {
+	animation: loader-animation;
+	animation-duration: 10s;
+	animation-iteration-count: 1;
+	animation-fill-mode: forwards;
+	animation-play-state: paused;
+	animation-timing-function: linear;
+	border-radius: 1em;
+	background-color: #ffbbec;
+	width: 50%;
+	height: 1em;
+}
+
+@keyframes loader-animation {
+	0% {
+		width: 100%;
+	}
+	100% {
+		width: 0%
+	}
+}

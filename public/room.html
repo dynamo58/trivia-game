@@ -5,21 +5,56 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="/styles/main.css">
+	<link rel="stylesheet" href="/styles/game.css">
+	<script type="text/javascript" src="/scripts/shared.js"></script>
 	<title>Room</title>
 </head>
 <body>
+	<div id="modal" class="modal">
+		<div class="modalContentWrapper">
+			<div id="modalContent" class="modalContent"></div>
+		</div>
+	</div>
+
+	<nav>
+		<div id="createRoom" class="navbar__item">Create room</div>
+		<a href="/"><div class="navbar__item">Tutorial</div></a>
+		<div id="browseRooms" class="navbar__item">Browse rooms</div>
+	</nav>
+
 	<div class="game_field">
 		<div class="playerStatus">
 			<div class="playerStatus__player1">
-				<div id="playerStatus__player1__name"></div>
-				<div id="playerStatus__player1__score"></div>
+				<div class="playerName" id="player1Name">No one joined yet</div>
+				<div class="playerScore" id="player1Score">0</div>
 			</div>
 			<div class="playerStatus__player2">
-				<div id="playerStatus__player2__name"></div>
-				<div id="playerStatus__player2__score"></div>
+				<div class="playerName" id="player2Name">No one has joined yet</div>
+				<div class="playerScore" id="player2Score">0</div>
+			</div>
+		</div>
+		<div class="gameField">
+			<div class="question">
+				<div id="questionQuestion">In programming, the ternary operator is mostly defined with what symbol(s)?</div>
+				<div class="questionFields">
+					<div class="questionField" id="questionField1">?:</div>
+					<div class="questionField" id="questionField2">??</div>
+					<div class="questionField" id="questionField3">?</div>
+					<div class="questionField" id="questionField4">if then</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="gameStatus">
+			<div id="currentEvent">Waiting for players to join</div>
+			<div class="loaderWrapper">
+				<div class="loaderBg">
+					<div id="loader"></div>
+				</div>
 			</div>
 		</div>
 	</div>
-	<script src="/scripts/ws.js"></script>
+	<script src="/scripts/modal.js"></script>
+	<script src="/scripts/room.js"></script>
 </body>
 </html>

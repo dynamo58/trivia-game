@@ -1,5 +1,5 @@
 import { Context } from 'https://deno.land/x/abc@v1.3.3/mod.ts';
-import { v4 } from "https://deno.land/std/uuid/mod.ts"
+import { v4 } from "https://deno.land/std@0.132.0/uuid/mod.ts";
 import { Player, Participant, Room, is_room, println } from "./lib.ts";
 import { acceptWebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
 
@@ -73,42 +73,71 @@ export const socket = async (
 		bufWriter,
 	});
 
+	const _uuid = v4.generate();
+
 	let userType: Participant = Participant.Spectator;
 
 	for await (const e of ws) {
-		const data = JSON.parse(e.toString());
+		try {
+			console.log(e)
+			const data = JSON.parse(e.toString());
 
-		switch (data.action) {
-			case "join":
-				let room = is_room(rooms, data.roomId);
-				if (room && room.password === roomPassword) {
-					if (room.player1 == null) {
-						userType = Participant.Player1;
-						if (data.nickname && typeof data.nikname)
-							room.player1 = new Player(data.nickname);
+			switch (data.action) {
+				case "join":
+					let errors: string[] = [];
+
+					let room = is_room(rooms, data.roomId);
+					if (
+						room &&
+						(room.password === null || roomPassword === room.password) &&
+						(!!data.nickname)
+					) {
+						if (room.password === null || roomPassword === room.password) {
+							if (room.player1 == null) {
+								userType = Participant.Player1;
+								if (data.nickname && typeof data.nickname)
+									room.player1 = new Player(data.nickname);
+							}
+							else if (room.player2 == null) {
+								userType = Participant.Player2;
+								if (data.nickname && typeof data.nickname)
+									room.player2 = new Player(data.nickname);
+							}
+							else
+								userType = Participant.Spectator;
+							
+							room.sockets.set(_uuid, ws);
+
+							for (const [_, socket] of room.sockets.entries()) {
+								socket.send(JSON.stringify({
+									action: "someoneJoined",
+									type: userType,
+									nickname: data.nickname,
+								}))
+							}
+						}
 					}
-					else if (room.player2 == null) {
-						userType = Participant.Player2;
-						if (data.nickname && typeof data.nikname)
-							room.player2 = new Player(data.nickname);
-					}
-					else
-						userType = Participant.Spectator;
-				}
 
-				ws.send(JSON.stringify({
-					action: "joinAnswer",
-					success: !!room,
-					role: userType,
-					roomState: (room) ? {
-						player1: room.player1,
-						player2: room.player2,
-						name:    room.name
-					} : null
-				}));
-				break;
-		}
+					if (!room)
+						errors.push("The room was not found");
+					if (!data.nickname)
+						errors.push("")
 
-		await ws.send("Hello, Client!");
+					ws.send(JSON.stringify({
+						action: "joinAnswer",
+						success: !!room && !!data.nickname,
+						error: (!!data.nickname) ? null : "",
+						role: userType,
+						roomState: (room) ? {
+							player1: room.player1,
+							player2: room.player2,
+							name:    room.name
+						} : null,
+					}));
+					break;
+			}
+		} catch {}
 	}
+	
+	console.log("he disconnected");
 }
