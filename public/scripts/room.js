@@ -9,7 +9,7 @@ const spectators = $("spectators");
 const bar = $("loader");
 const currentEvent = $("currentEvent");
 
-function room_id() {
+function roomId() {
 	return window
 		.location
 		.toString()
@@ -24,20 +24,38 @@ function uri() {
 		uri = "wss:"; 
 
 	uri += "//" + loc.host;
-	uri += "/ws/" + room_id();
+	uri += "/ws/" + roomId();
 
 	return uri;
 }
 
 const ws = new WebSocket(uri());
 
-let clientData = {
-	userName: null
+let client = {
+	userName: null,
+	password: null
 };
 
-ws.onopen = () => {
+ws.onopen = (e) => {
 	console.log("Established a WebSocket connection");
 	
+	showModal(CONNECT_TO_ROOM_MODAL_CONTENT);
+
+	$("connectToRoomForm").addEventListener("submit", async (e) => {
+		e.preventDefault();
+
+		const nickname = $("connectRoomNickname").value;
+		const password = $("connectRoomPassword").value;
+
+		if (roomName == "") {
+			alert("Room must have a name.");
+			return;
+		} else if (roomName.includes(" ")) {
+			alert("Room name shall not contain any spaces.");
+			return;
+		}
+	});
+
 	let nick = prompt("Connected! Please enter your desired nick", "");
 	
 	clientData.userName = nick;
@@ -101,13 +119,23 @@ ws.onmessage = async (evt) => {
 	
 }
 
+function getRoomInfo() {
+	let id = roomId()
+	ws.send(JSON.stringify({
+		action: "requestRoomInfo",
+		roomId: roomId()
+	}));
+}
+
 function joinRoom(s) {
 	ws.send(JSON.stringify({
 		action: "join",
 		nickname: s,
-		roomId: room_id()
+		roomId: roomId()
 	}));
 }
+
+
 
 function refreshRoomData(roomState) {
 	player1name.innerText  = roomState.player1.nickname;

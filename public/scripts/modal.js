@@ -1,4 +1,4 @@
-const modal = $("modal");
+const modal        = $("modal");
 const modalContent = $("modalContent");
 
 const CREATE_ROOM_MODAL_CONTENT = `
@@ -33,6 +33,33 @@ const BROWSE_ROOMS_MODAL_CONTENT = `
 	<div id="rooms" class="rooms"></div>
 `;
 
+const CONNECT_TO_ROOM_MODAL_CONTENT = `
+	<form autocomplete="off" id="connectToRoomForm">
+	<input
+		type="text"
+		autocomplete="false"
+		name="connectRoomNickname"
+		id="connectRoomNickname"
+		placeholder="Desired nick"
+	>
+	<br><br>
+	<input
+		type="password"
+		autocomplete="false"
+		name="connectRoomPassword"
+		id="connectRoomPassword"
+		placeholder="Room password (optional)"
+	>
+	<br><br><br>
+	<input
+		type="submit"
+		value="Join room"
+		class="btn"
+		id="JoinRoomBtn"
+	>
+	</form>
+`;
+
 async function refresh_rooms() {
 	let el = $("rooms");
 	el.innerHTML = "";
@@ -49,10 +76,14 @@ async function refresh_rooms() {
 		`;
 }
 
+function showModal(html) {
+	modalContent.innerHTML = html;
+	modal.style.display = "block";
+}
+
 window.onclick = async function(event) {
 	if (event.target == $("createRoom")) {
-		modalContent.innerHTML = CREATE_ROOM_MODAL_CONTENT;
-		modal.style.display = "block";
+		showModal(CREATE_ROOM_MODAL_CONTENT)
 
 		$("createRoomForm").addEventListener("submit", async (e) => {
 			e.preventDefault();
@@ -64,7 +95,7 @@ window.onclick = async function(event) {
 				alert("Room must have a name.");
 				return;
 			} else if (roomName.includes(" ")) {
-				alert("Room name shall not contain a space.");
+				alert("Room name shall not contain any spaces.");
 				return;
 			}
 
@@ -95,8 +126,7 @@ window.onclick = async function(event) {
 		});
 
 	} else if (event.target == $("browseRooms")) {
-		modalContent.innerHTML = BROWSE_ROOMS_MODAL_CONTENT;
-		modal.style.display = "block";
+		showModal(BROWSE_ROOMS_MODAL_CONTENT);
 		await refresh_rooms();
 
 	} else if (event.target == modal && modal.style.display == "block") {
