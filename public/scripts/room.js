@@ -42,16 +42,14 @@ let client = {
 
 // handle incoming socket messages
 ws.onopen = (e) => {
-	let data = JSON.parse(data);
 	console.log("Established a WebSocket connection");
-	
 	getRoomInfo();
 }
 
 ws.onmessage = async (evt) => {
 	try {
 		const data = JSON.parse(evt.data);
-		// console.log(data);
+		console.log(data);
 
 		switch (data.action) {
 			case "getRoomInfoAnswer":
@@ -88,11 +86,9 @@ ws.onmessage = async (evt) => {
 }
 
 function handle_connect_modal() {
-	if (!data.passwordRequired)
-		$("connectRoomPassword").setAttribute("disabled", "disabled")
-
-	$("connectToRoomForm").addEventListener("submit", async (e) => {
+	$("joinRoomBtn").addEventListener("click", async (e) => {
 		e.preventDefault();
+		console.log("b");
 
 		const nickname = $("connectRoomNickname").value;
 		const password = $("connectRoomPassword").value;
@@ -104,6 +100,7 @@ function handle_connect_modal() {
 		}
 		
 		joinRoom(nickname, password);
+		hideModal();
 	});
 }
 
@@ -165,7 +162,6 @@ function joinRoom(nickname, password) {
 
 function handleGetRoomInfoAnswer(data) {
 	if (data.success) {
-		refreshRoomData(data.roomState);
 		showModal(CONNECT_TO_ROOM_MODAL_CONTENT);
 		handle_connect_modal();
 	} else {

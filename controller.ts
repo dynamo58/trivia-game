@@ -83,6 +83,7 @@ export const socket = async (
 	for await (const e of ws) {
 		try {
 			const data = JSON.parse(e.toString());
+			console.log(data);
 
 			switch (data.action) {
 				case "join":
@@ -147,6 +148,21 @@ export const socket = async (
 							}
 						}
 					}
+					break;
+			
+				case "requestRoomInfo":
+					let room_ = is_room(rooms, data.roomId);
+					ws.send(JSON.stringify({
+						action: "getRoomInfoAnswer",
+						paswordRequired: (room_) ? !!room_.password : null, 
+						success: !!room_,
+						roomState: (room_) ? {
+							player1: room_.player1,
+							player2: room_.player2,
+							name:    room_.name,
+							spectators: room_.spectators,
+						} : null,
+					}));
 					break;
 			}
 		} catch {}

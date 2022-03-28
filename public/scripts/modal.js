@@ -34,7 +34,6 @@ const BROWSE_ROOMS_MODAL_CONTENT = `
 `;
 
 const CONNECT_TO_ROOM_MODAL_CONTENT = `
-	<form autocomplete="off" id="connectToRoomForm">
 	<input
 		type="text"
 		autocomplete="false"
@@ -49,19 +48,17 @@ const CONNECT_TO_ROOM_MODAL_CONTENT = `
 		name="connectRoomPassword"
 		id="connectRoomPassword"
 		placeholder="Room password"
-	>
+	><br><br>
+	<select name="joinRoomAs" id="joinRoomAs">
+		<option value="player">Player</option>
+		<option value="spectator">Spectator</option>
+  	</select><br>
 	<br><br><br>
-	<input
-		type="submit"
+	<button
 		value="Join room"
 		class="btn"
-		id="JoinRoomBtn"
-	>
-	<select name="cars" id="cars">
-		<option value="volvo">Player</option>
-		<option value="audi">Spectator</option>
-  	</select>
-	</form>
+		id="joinRoomBtn"
+	>Submit</button>
 `;
 
 async function refresh_rooms() {
