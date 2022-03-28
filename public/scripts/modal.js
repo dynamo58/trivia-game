@@ -48,7 +48,7 @@ const CONNECT_TO_ROOM_MODAL_CONTENT = `
 		autocomplete="false"
 		name="connectRoomPassword"
 		id="connectRoomPassword"
-		placeholder="Room password (optional)"
+		placeholder="Room password"
 	>
 	<br><br><br>
 	<input
@@ -57,6 +57,10 @@ const CONNECT_TO_ROOM_MODAL_CONTENT = `
 		class="btn"
 		id="JoinRoomBtn"
 	>
+	<select name="cars" id="cars">
+		<option value="volvo">Player</option>
+		<option value="audi">Spectator</option>
+  	</select>
 	</form>
 `;
 
@@ -79,6 +83,10 @@ async function refresh_rooms() {
 function showModal(html) {
 	modalContent.innerHTML = html;
 	modal.style.display = "block";
+}
+
+function hideModal() {
+	modal.style.display = "none";
 }
 
 window.onclick = async function(event) {
@@ -129,7 +137,8 @@ window.onclick = async function(event) {
 		showModal(BROWSE_ROOMS_MODAL_CONTENT);
 		await refresh_rooms();
 
-	} else if (event.target == modal && modal.style.display == "block") {
-		modal.style.display = "none";
-	}
+	} else if (
+		event.target == modal &&
+		modal.style.display == "block"
+	) hideModal(); 
 }

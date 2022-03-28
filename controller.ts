@@ -126,7 +126,7 @@ export const socket = async (
 					if (!room)
 						errors.push("The room was not found");
 					if (!data.nickname)
-						errors.push("")
+						errors.push("");
 
 					ws.send(JSON.stringify({
 						action: "joinAnswer",

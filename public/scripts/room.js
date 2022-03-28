@@ -1,14 +1,15 @@
+// frontent objects
 const player1name  = $("player1Name");
 const player1score = $("player1Score");
 const player2name  = $("player2Name");
 const player2score = $("player2Score");
 
-const spectators = $("spectators");
+const spectators   = $("spectators");
 
-
-const bar = $("loader");
+const bar           = $("loader");
 const currentEvent = $("currentEvent");
 
+// scrape the roomId from URL
 function roomId() {
 	return window
 		.location
@@ -20,6 +21,9 @@ function uri() {
 	const loc = window.location;
 
 	let uri = "ws:";
+
+	// the protocol should be https due to
+	// passwords & stuff being sent
 	if (loc.protocol === "https:") 
 		uri = "wss:"; 
 
@@ -36,77 +40,42 @@ let client = {
 	password: null
 };
 
+// handle incoming socket messages
 ws.onopen = (e) => {
+	let data = JSON.parse(data);
 	console.log("Established a WebSocket connection");
 	
-	showModal(CONNECT_TO_ROOM_MODAL_CONTENT);
-
-	$("connectToRoomForm").addEventListener("submit", async (e) => {
-		e.preventDefault();
-
-		const nickname = $("connectRoomNickname").value;
-		const password = $("connectRoomPassword").value;
-
-		if (roomName == "") {
-			alert("Room must have a name.");
-			return;
-		} else if (roomName.includes(" ")) {
-			alert("Room name shall not contain any spaces.");
-			return;
-		}
-	});
-
-	let nick = prompt("Connected! Please enter your desired nick", "");
-	
-	clientData.userName = nick;
-	joinRoom(nick);
+	getRoomInfo();
 }
 
 ws.onmessage = async (evt) => {
 	try {
 		const data = JSON.parse(evt.data);
-		console.log(data);
+		// console.log(data);
+
 		switch (data.action) {
+			case "getRoomInfoAnswer":
+				handleGetRoomInfoAnswer(data);
+				break;
+
 			case "joinAnswer":
-				if (data.success) {
-					refreshRoomData(data.roomState);
-				} else
-					console.log(`Failed to join room, ${data.message}`);
+				handleJoinAnwer(data);
 				break;
 				
 			case "gameStarting":
-				currentEvent.innerText = "Game is starting shortly, get ready!";
-			
-				playSound("/sounds/game_starting.mp3");
-				
-				runTimedProgressBar("10s", async function () {
-					playSound("/sounds/game_started.mp3");
-				});
+				handleGameStarting();
 				break;
 			
 			case "gameStarted":
-
+				handleGameStarted(data);
 				break;
 			
 			case "gameEnded":
-
+				handleGameEnded(data);
 				break;
 
 			case "someoneJoined":
-				switch (data.type) {
-					case "player1":
-						player1name.innerText  = data.nickname;
-						player1score.innerText = 0;
-						break;
-					case "player2":
-						player1name.innerText  = data.nickname;
-						player1score.innerText = 0;
-						break;
-
-					case "spectator":
-						spectators.innerText += data.nickname
-						break
-				}
+				handleSomeoneJoined(data)
 				break;
 
 			// ideally this wouldn't be used
@@ -116,33 +85,31 @@ ws.onmessage = async (evt) => {
 				break;
 		}
 	} catch {}
-	
 }
 
-function getRoomInfo() {
-	let id = roomId()
-	ws.send(JSON.stringify({
-		action: "requestRoomInfo",
-		roomId: roomId()
-	}));
+function handle_connect_modal() {
+	if (!data.passwordRequired)
+		$("connectRoomPassword").setAttribute("disabled", "disabled")
+
+	$("connectToRoomForm").addEventListener("submit", async (e) => {
+		e.preventDefault();
+
+		const nickname = $("connectRoomNickname").value;
+		const password = $("connectRoomPassword").value;
+
+		if (nickname == "") {
+			
+			alert("You must choose a name");
+			handle_connect_modal();
+		}
+		
+		joinRoom(nickname, password);
+	});
 }
 
-function joinRoom(s) {
-	ws.send(JSON.stringify({
-		action: "join",
-		nickname: s,
-		roomId: roomId()
-	}));
-}
-
-
-
-function refreshRoomData(roomState) {
-	player1name.innerText  = roomState.player1.nickname;
-	player1score.innerText = roomState.player1.score;
-	player2name.innerText  = roomState.player2.nickname;
-	player2score.innerText = roomState.player2.score;
-}
+// --------
+// frontend
+// --------
 
 function runTimedProgressBar(duration, cb) {
 	bar.addEventListener('animationend', cb);
@@ -161,4 +128,86 @@ function playSound(url){
 	document.body.appendChild(audio);
 }
 
-// setInterval(function () { ws.send("Hello, Server!"); }, 1000);
+// ---------
+// data handlers
+// ---------
+
+function refreshRoomData(roomState) {
+	player1name.innerText  = roomState.player1.nickname;
+	player1score.innerText = roomState.player1.score;
+	player2name.innerText  = roomState.player2.nickname;
+	player2score.innerText = roomState.player2.score;
+}
+
+// ----------
+// ws senders
+// ----------
+
+function getRoomInfo() {
+	ws.send(JSON.stringify({
+		action: "requestRoomInfo",
+		roomId: roomId()
+	}));
+}
+
+function joinRoom(nickname, password) {
+	ws.send(JSON.stringify({
+		action: "join",
+		nickname: nickname,
+		password: password,
+		roomId: roomId()
+	}));
+}
+
+// -----------
+// ws handlers
+// -----------
+
+function handleGetRoomInfoAnswer(data) {
+	if (data.success) {
+		refreshRoomData(data.roomState);
+		showModal(CONNECT_TO_ROOM_MODAL_CONTENT);
+		handle_connect_modal();
+	} else {
+		alert(`Couldn't find room\n\n\n, ${data.errors.join("\n")}`);
+	}
+}
+
+function handleJoinAnwer(data) {
+	if (data.success) {
+		refreshRoomData(data.roomState);
+		hideModal();
+	} else
+		alert(`Couldn't join room\n\n\n, ${data.errors.join("\n")}`);
+}
+
+function handleGameStarting() {
+	currentEvent.innerText = "Game is starting shortly, get ready!";
+
+	playSound("/sounds/game_starting.mp3");
+	
+	runTimedProgressBar("10s", async function () {
+		playSound("/sounds/game_started.mp3");
+	});
+}
+
+function handleGameStarted(data) {}
+
+function handleGameEnded(data) {}
+
+function handleSomeoneJoined(data) {
+	switch (data.type) {
+		case "player1":
+			player1name.innerText  = data.nickname;
+			player1score.innerText = 0;
+			break;
+		case "player2":
+			player1name.innerText  = data.nickname;
+			player1score.innerText = 0;
+			break;
+
+		case "spectator":
+			spectators.innerText += data.nickname
+			break
+	}
+}
