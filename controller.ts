@@ -1,6 +1,6 @@
 import { Context } from 'https://deno.land/x/abc@v1.3.3/mod.ts';
 import { v4 } from "https://deno.land/std@0.132.0/uuid/mod.ts";
-import { Player, Participant, Room, is_room, println } from "./lib.ts";
+import { Player, Participant, Room, is_room, println, fetch_questions } from "./lib.ts";
 import { acceptWebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
 import { sleep } from "https://deno.land/x/sleep/mod.ts";
 
@@ -100,27 +100,36 @@ export const socket = async (
 						_room = room;
 						_nickname = data.nickname;
 
-						if (room.player1 == null) {
+						if (room.player1 == null &&
+							data.participatorType === "player"
+						) {
 							userType = Participant.Player1;
 							room.player1 = new Player(data.nickname);
 							joined_as_player = true;
 						}
-						else if (room.player2 == null) {
+						else if (
+							room.player2 == null &&
+							data.participatorType === "player"
+						) {
 							userType = Participant.Player2;
 							room.player2 = new Player(data.nickname);
 							joined_as_player = true;
 						}
-						else
+						else {
 							userType = Participant.Spectator;
+							room.spectators.push(data.nickname);
+						}
 						
 						room.sockets.set(_uuid, ws);
 
-						for (const [_, socket] of room.sockets.entries()) {
-							socket.send(JSON.stringify({
-								action: "someoneJoined",
-								type: userType,
-								nickname: data.nickname,
-							}));
+						for (const [uuid, socket] of room.sockets.entries()) {
+							if (!(_uuid === uuid)) {
+								socket.send(JSON.stringify({
+									action: "someoneJoined",
+									type: userType,
+									nickname: data.nickname,
+								}));
+							}
 						}
 					}
 
@@ -137,7 +146,8 @@ export const socket = async (
 						roomState: (room) ? {
 							player1: room.player1,
 							player2: room.player2,
-							name:    room.name
+							name:    room.name,
+							spectators: room.spectators
 						} : null,
 					}));
 
@@ -167,7 +177,7 @@ export const socket = async (
 			}
 		} catch {}
 	}
-	
+
 	if (_room && _nickname) {
 		_room.sockets.delete(_uuid);
 
@@ -185,9 +195,10 @@ export const socket = async (
 				break;
 		}
 		// console.log("he disconnected");
-		console.log(_room);
+		// console.log(_room);
 	}
 }
+
 
 async function ongoingGameHandler(room: Room) {
 	for (const [_, socket] of room.sockets.entries()) {
@@ -195,6 +206,9 @@ async function ongoingGameHandler(room: Room) {
 			action: "gameStarting",
 		}));
 	}
-
+	
 	await sleep(5);
+	
+	console.log(`Room \`${room.name}\` has started.`)
+	fetch_questions(1);
 }

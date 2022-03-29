@@ -32,4 +32,4 @@ app
 	.get("/ws/:roomId", (c: Context) => socket(c, rooms))
 	.start({ port: PORT });
 
-// await Deno.stdout.write(new TextEncoder().encode(`App listening on http://localhost:${PORT}/\n`));
+await Deno.stdout.write(new TextEncoder().encode(`App listening on http://localhost:${PORT}/\n`));

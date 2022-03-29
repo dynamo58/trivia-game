@@ -110,7 +110,7 @@ window.onclick = async function(event) {
 				method: "POST",
 				mode: "same-origin",
 				headers: {
-					'Content-Type': 'application/json'
+					"Content-Type": "application/json"
 				},
 				body: JSON.stringify({
 					roomName: roomName,

@@ -61,3 +61,44 @@ export function is_room(
 
     return false;
 }
+
+export function clamp(num: number, min: number, max: number) {
+    return Math.min(Math.max(num, min), max);
+}
+
+// shamelessly yoinked from
+// https://stackoverflow.com/a/46545530
+export function shuffle(arr: any[]) {
+    return arr
+        .map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+}
+
+// retrieve questions from an API
+export async function fetch_questions(amount: number) {
+    let num = Math.floor(clamp(amount, 1, 50));
+
+    await fetch(`https://opentdb.com/api.php?amount=${num}&category=18`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+        .then(res => res.json())
+        .then(data => {
+            let qs = Array.from(data.results).map((q: any) => {
+                let all_answers = q.incorrect_answers;
+                all_answers.push(q.correct_answer);
+                all_answers = shuffle(all_answers);
+
+                return {
+                    question: q.question,
+                    all_answers: all_answers,
+                    correct_answer_idx: all_answers.indexOf(q.correct_answer)
+                }
+            });
+
+            console.log(qs);
+        });
+}
