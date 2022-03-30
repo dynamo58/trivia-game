@@ -22,20 +22,59 @@ export class Room {
 	public name:         string;
     public sockets:      Map<string, WebSocket>;
     public spectators:   string[];
-	password:            string | null;
-
-
+	public currQuestion: Question | null;
+    //                         `number` here is the index
+    //                         of the answer
+    public recdAnswers:  Map<string, number>;
+    password:            string | null;
+    
     constructor(
         name: string,
         pw:   string | null,
     ) {
-        this.player1  = null;
-        this.player2  = null;
-        this.name     = name;
-        this.password = pw;
-        this.sockets  = new Map();
+        this.player1    = null;
+        this.player2    = null;
+        this.name       = name;
+        this.password   = pw;
+        this.sockets    = new Map();
         this.spectators = [];
+        this.currQuestion = null;
     }
+
+    sendQuestion() {
+        let q = fetchQuestion(1);
+        this.currQuestion = q;
+
+        for (let [_, ws] of self.sockets) {
+            ws.send(JSON.stringify({
+                action: "question",
+                questions: q.all_answers,
+            }));
+        }
+    }
+
+    handleGame() {
+        for (const [_, socket] of room.sockets.entries()) {
+            socket.send(JSON.stringify({
+                action: "gameStarting",
+            }));
+        }
+        
+        await sleep(5);
+        console.log(`Room \`${self.name}\` has started.`)
+        
+        while (true) {
+            room.sendQuestion(question);
+        }
+    }
+}
+
+// represents a question
+// as percieved by the server
+export interface Question {
+    question: string,
+    all_answers: string[],
+    correct_answer_idx: number,
 }
 
 // all the variants as which one can
@@ -62,7 +101,12 @@ export function is_room(
     return false;
 }
 
-export function clamp(num: number, min: number, max: number) {
+// clamp a value between two numbers
+export function clamp(
+    num: number,
+    min: number,
+    max: number
+): number {
     return Math.min(Math.max(num, min), max);
 }
 
@@ -76,7 +120,7 @@ export function shuffle(arr: any[]) {
 }
 
 // retrieve questions from an API
-export async function fetch_questions(amount: number) {
+export async function fetchQuestion(amount: number): Question[] {
     let num = Math.floor(clamp(amount, 1, 50));
 
     await fetch(`https://opentdb.com/api.php?amount=${num}&category=18`, {
@@ -92,13 +136,17 @@ export async function fetch_questions(amount: number) {
                 all_answers.push(q.correct_answer);
                 all_answers = shuffle(all_answers);
 
-                return {
+                let out: Question = {
                     question: q.question,
                     all_answers: all_answers,
                     correct_answer_idx: all_answers.indexOf(q.correct_answer)
-                }
+                };
+
+                return out;
             });
 
-            console.log(qs);
+            return qs;
         });
 }
+
+

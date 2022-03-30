@@ -151,12 +151,12 @@ export const socket = async (
 						} : null,
 					}));
 
-					if (joined_as_player) {
-						if (room) {
-							if (room.player1 && room.player2) {
-								await ongoingGameHandler(room);
-							}
-						}
+					if (
+						joined_as_player &&
+						room &&
+						room.player1 && room.player2
+					) {
+						await ongoingGameHandler(room);
 					}
 					break;
 			
@@ -199,16 +199,6 @@ export const socket = async (
 	}
 }
 
-
 async function ongoingGameHandler(room: Room) {
-	for (const [_, socket] of room.sockets.entries()) {
-		socket.send(JSON.stringify({
-			action: "gameStarting",
-		}));
-	}
 	
-	await sleep(5);
-	
-	console.log(`Room \`${room.name}\` has started.`)
-	fetch_questions(1);
 }
