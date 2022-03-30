@@ -1,4 +1,5 @@
 import { WebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
+import { sleep } from "https://deno.land/x/sleep/mod.ts";
 
 export const println = async (s: string) => 
     await Deno.stdout.write(new TextEncoder().encode(`${s}\n`));
@@ -6,26 +7,28 @@ export const println = async (s: string) =>
 // represents a player in a lobby
 export class Player {
     public nickname: string;
+    public uuid:     string;
     public score:    number;
 
-    constructor(n: string) {
+    constructor(n: string, uuid: string) {
         this.nickname = n;
         this.score    = 0;
+        this.uuid     = uuid;
     }
 }
+
+type uuid = string;
 
 // represents a room/lobby of an instance
 // of an ongoing game
 export class Room {
+    public sockets:      Map<uuid, WebSocket>;
+    public recdAnswers:  Map<uuid, number>;
 	public player1:      Player | null;
 	public player2:      Player | null;
 	public name:         string;
-    public sockets:      Map<string, WebSocket>;
     public spectators:   string[];
 	public currQuestion: Question | null;
-    //                         `number` here is the index
-    //                         of the answer
-    public recdAnswers:  Map<string, number>;
     password:            string | null;
     
     constructor(
@@ -39,13 +42,14 @@ export class Room {
         this.sockets    = new Map();
         this.spectators = [];
         this.currQuestion = null;
+        this.recdAnswers = new Map();
     }
 
-    sendQuestion() {
-        let q = fetchQuestion(1);
+    async sendQuestion() {
+        let q = (await fetchQuestion(1))[0];
         this.currQuestion = q;
 
-        for (let [_, ws] of self.sockets) {
+        for (let [_, ws] of this.sockets) {
             ws.send(JSON.stringify({
                 action: "question",
                 questions: q.all_answers,
@@ -53,18 +57,58 @@ export class Room {
         }
     }
 
-    handleGame() {
-        for (const [_, socket] of room.sockets.entries()) {
+    async handleGame() {
+        for (const [_, socket] of this.sockets.entries()) {
             socket.send(JSON.stringify({
                 action: "gameStarting",
             }));
         }
         
         await sleep(5);
-        console.log(`Room \`${self.name}\` has started.`)
+        console.log(`Room \`${this.name}\` has started playing.`)
         
         while (true) {
-            room.sendQuestion(question);
+            this.recdAnswers.clear();
+            await this.sendQuestion();
+            await sleep(10);
+            this.evaluateAnswers();
+            await sleep(5);
+        }
+    }
+
+    evaluateAnswers() {
+        let results: Map<uuid, boolean> = new Map();
+
+        for (let [uuid, answer_idx] of this.recdAnswers.keys()) {
+            if (this.player1?.uuid === uuid) {
+                if (this.currQuestion?.correct_answer_idx == parseInt(answer_idx)) {
+                    results.set(uuid, true);
+                    this.player1.score += 10;
+                } else
+                    results.set(uuid, false);
+            }
+
+            if (this.player2?.uuid === uuid) {
+                if (this.currQuestion?.correct_answer_idx == parseInt(answer_idx)) {
+                    results.set(uuid, true);
+                    this.player2.score += 10;
+                } else
+                    results.set(uuid, false);
+            }
+        }
+
+        for (let [uuid, ws] of this.sockets) {
+            ws.send(JSON.stringify({
+                action: "answerEvaluation",
+                evaluation: results.get(uuid),
+                correctAnswer: this.currQuestion?.all_answers[this.currQuestion?.correct_answer_idx],
+                roomState: {
+                    name:       this.name,
+                    player1:    this.player1,
+                    player2:    this.player2,
+                    spectators: this.spectators
+                }
+            }));
         }
     }
 }
@@ -120,10 +164,10 @@ export function shuffle(arr: any[]) {
 }
 
 // retrieve questions from an API
-export async function fetchQuestion(amount: number): Question[] {
+export async function fetchQuestion(amount: number): Promise<Question[]> {
     let num = Math.floor(clamp(amount, 1, 50));
 
-    await fetch(`https://opentdb.com/api.php?amount=${num}&category=18`, {
+    return await fetch(`https://opentdb.com/api.php?amount=${num}&category=18`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"

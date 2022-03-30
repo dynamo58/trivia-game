@@ -1,8 +1,7 @@
 import { Context } from 'https://deno.land/x/abc@v1.3.3/mod.ts';
 import { v4 } from "https://deno.land/std@0.132.0/uuid/mod.ts";
-import { Player, Participant, Room, is_room, println, fetch_questions } from "./lib.ts";
+import { Player, Participant, Room, is_room, println } from "./lib.ts";
 import { acceptWebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
-import { sleep } from "https://deno.land/x/sleep/mod.ts";
 
 export const getEmote = async (c: Context) => {
 	const { emoteName } = c.params;
@@ -104,7 +103,7 @@ export const socket = async (
 							data.participatorType === "player"
 						) {
 							userType = Participant.Player1;
-							room.player1 = new Player(data.nickname);
+							room.player1 = new Player(data.nickname, _uuid);
 							joined_as_player = true;
 						}
 						else if (
@@ -112,7 +111,7 @@ export const socket = async (
 							data.participatorType === "player"
 						) {
 							userType = Participant.Player2;
-							room.player2 = new Player(data.nickname);
+							room.player2 = new Player(data.nickname, _uuid);
 							joined_as_player = true;
 						}
 						else {
@@ -156,7 +155,7 @@ export const socket = async (
 						room &&
 						room.player1 && room.player2
 					) {
-						await ongoingGameHandler(room);
+						await room.handleGame();
 					}
 					break;
 			
@@ -197,8 +196,4 @@ export const socket = async (
 		// console.log("he disconnected");
 		// console.log(_room);
 	}
-}
-
-async function ongoingGameHandler(room: Room) {
-	
 }
