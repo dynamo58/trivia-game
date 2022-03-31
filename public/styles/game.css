@@ -40,13 +40,14 @@
 }
 
 .questionFields div {
+	user-select: none;
 	width: 50%;
 	text-align: center;
 	padding: 1em 0;
 }
 
 .questionFields div:hover {
-	background-color: #FFBBEC55;
+	background-color: #6745b755;
 	cursor: pointer;
 }	
 
@@ -111,7 +112,6 @@
 
 #loader {
 	animation: loader-animation;
-	animation-duration: 10s;
 	animation-iteration-count: 1;
 	animation-fill-mode: forwards;
 	animation-play-state: paused;

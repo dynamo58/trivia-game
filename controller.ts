@@ -153,8 +153,11 @@ export const socket = async (
 					if (
 						joined_as_player &&
 						room &&
-						room.player1 && room.player2
+						!room.isGame &&
+						room.player1 &&
+						room.player2
 					) {
+						room.isGame = true;
 						await room.handleGame();
 					}
 					break;

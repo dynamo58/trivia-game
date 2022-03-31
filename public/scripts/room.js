@@ -1,10 +1,19 @@
-// frontent objects
+// frontent objects (some may be implicitly imported from `modal.js`)
 const player1name  = $("player1Name");
 const player1score = $("player1Score");
 const player2name  = $("player2Name");
 const player2score = $("player2Score");
 
 const spectators   = $("spectators");
+
+const question     = $("questionQuestion");
+
+const questions    = [
+	$("questionField1"),
+	$("questionField2"),
+	$("questionField3"),
+	$("questionField4")
+];
 
 const bar          = $("loader");
 const currentEvent = $("currentEvent");
@@ -13,8 +22,19 @@ const ws = new WebSocket(uri());
 
 let client = {
 	userName: null,
-	password: null
+	password: null,
+	curr_chosen_index: null,
 };
+
+for (let i = 0; i < 4; i++)
+	questions[i].addEventListener("click", () => {
+		client.curr_chosen_index = i;
+		questions[i].style.backgroundColor = "#ffbbec77";
+
+		let other_idxs = [0,1,2,3].filter(idx => idx !== i);
+		for (let idx of other_idxs)
+			questions[idx].style.backgroundColor = null;
+	});
 
 // handle incoming socket messages
 ws.onopen = (e) => {
@@ -41,9 +61,17 @@ ws.onmessage = async (evt) => {
 				break;
 			
 			case "gameStarted":
-				handleGameStarted(data);
+				handleGameStarted();
 				break;
-			
+
+			case "question":
+				handleQuestion(data.question);
+				break;
+
+			case "answerEvaluation":
+				await handleAnswerEvaluation(data);
+				break;
+
 			case "gameEnded":
 				handleGameEnded(data);
 				break;
@@ -112,10 +140,13 @@ function handle_connect_modal() {
 // frontend
 // --------
 
-function runTimedProgressBar(duration, cb) {
-	bar.addEventListener('animationend', cb);
+async function runTimedProgressBar(duration) {
 	bar.style.animationDuration = duration;
 	bar.style.animationPlayState = 'running';
+
+	setTimeout(() => {
+		bar.style.animationPlayState = "paused";
+	}, parseInt(duration.split("s")[0]) * 1000);
 }
 
 function playSound(url){
@@ -197,17 +228,45 @@ function handleJoinAnwer(data) {
 		alert(`Couldn't join room\n\n\n, ${data.errors.join("\n")}`);
 }
 
-function handleGameStarting() {
+async function handleGameStarting() {
 	currentEvent.innerText = "Game is starting shortly, get ready!";
-
 	playSound("/sounds/game_starting.mp3");
-	
-	runTimedProgressBar("5s", async function () {
-		playSound("/sounds/game_started.mp3");
-	});
+	await runTimedProgressBar("5s");
 }
 
-function handleGameStarted(data) {}
+function handleGameStarted() {
+	playSound("/sounds/game_started.mp3");
+	currentEvent.innerText = "The game has started. Watch out for incoming questions!";
+}
+
+async function handleQuestion(q) {
+	await runTimedProgressBar("10s");
+	currentEvent.innerText = "A question has landed, answer it (10 seconds)!";
+
+	question.innerText = q.question;
+
+	for (let i = 0; i < 4; i++)
+		questions[i].innerText = q.all_answers[i];
+}
+
+async function handleAnswerEvaluation(data) {
+	currentEvent.innerText = "The question has been evaluated, take a breather (5 seconds).";
+	await runTimedProgressBar("5s");
+	
+	if (data.evaluation) {
+		modal.style.backgroundColor = "#00FF0099";
+		currentEvent = "Correct!";
+	} else {
+		currentEvent = `Wrong. Correct answer was \"${data.correctAnswer}\"`;
+		modal.style.backgroundColor = "FF000099";
+	}
+
+	refreshRoomData(data.roomState);
+
+	setTimeout(() => {
+		modal.style.backgroundColor = null;
+	}, 2000);
+}
 
 function handleGameEnded(data) {}
 

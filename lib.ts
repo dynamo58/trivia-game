@@ -17,7 +17,7 @@ export class Player {
     }
 }
 
-type uuid = string;
+export type uuid = string;
 
 // represents a room/lobby of an instance
 // of an ongoing game
@@ -29,20 +29,22 @@ export class Room {
 	public name:         string;
     public spectators:   string[];
 	public currQuestion: Question | null;
+    public isGame:       boolean;
     password:            string | null;
     
     constructor(
         name: string,
         pw:   string | null,
     ) {
-        this.player1    = null;
-        this.player2    = null;
-        this.name       = name;
-        this.password   = pw;
-        this.sockets    = new Map();
-        this.spectators = [];
+        this.player1     = null;
+        this.player2     = null;
+        this.name        = name;
+        this.password    = pw;
+        this.sockets     = new Map();
+        this.spectators  = [];
         this.currQuestion = null;
-        this.recdAnswers = new Map();
+        this.recdAnswers  = new Map();
+        this.isGame       = false
     }
 
     async sendQuestion() {
@@ -52,7 +54,10 @@ export class Room {
         for (let [_, ws] of this.sockets) {
             ws.send(JSON.stringify({
                 action: "question",
-                questions: q.all_answers,
+                question: {
+                    question: q.question,
+                    all_answers: q.all_answers,
+                }
             }));
         }
     }
@@ -67,15 +72,24 @@ export class Room {
         await sleep(5);
         console.log(`Room \`${this.name}\` has started playing.`)
         
+        for (const [_, socket] of this.sockets.entries()) {
+            socket.send(JSON.stringify({
+                action: "gameStarted",
+            }));
+        }
+
         while (true) {
-            this.recdAnswers.clear();
             await this.sendQuestion();
-            await sleep(10);
+            // give just a tiny bit of extra time
+            // (the frontend should still treat
+            //  this as 10 secs, though)
+            await sleep(10.1);
             this.evaluateAnswers();
             await sleep(5);
         }
     }
 
+    // 
     evaluateAnswers() {
         let results: Map<uuid, boolean> = new Map();
 
@@ -110,6 +124,8 @@ export class Room {
                 }
             }));
         }
+
+        this.recdAnswers.clear();
     }
 }
 

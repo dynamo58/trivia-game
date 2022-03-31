@@ -82,6 +82,7 @@ p {
 }
 
 .modal {
+	animation: all 1s linear;
 	display: none;
 	position: fixed;
 	top: 0;
