@@ -140,12 +140,17 @@ function handle_connect_modal() {
 // frontend
 // --------
 
-async function runTimedProgressBar(duration) {
+function runTimedProgressBar(duration) {
+	bar.style.width = "100%";
+	bar.style.animation = "loader-animation";
+	bar.style.animationIterationCount = "1";
+	bar.style.fillMode = "forwards";
+	bar.style.animationTimingFunction = "linear";
 	bar.style.animationDuration = duration;
 	bar.style.animationPlayState = 'running';
-
 	setTimeout(() => {
-		bar.style.animationPlayState = "paused";
+		bar.style.width = "0";
+		bar.style.animation = null;
 	}, parseInt(duration.split("s")[0]) * 1000);
 }
 
@@ -231,7 +236,7 @@ function handleJoinAnwer(data) {
 async function handleGameStarting() {
 	currentEvent.innerText = "Game is starting shortly, get ready!";
 	playSound("/sounds/game_starting.mp3");
-	await runTimedProgressBar("5s");
+	runTimedProgressBar("5s");
 }
 
 function handleGameStarted() {
@@ -240,7 +245,7 @@ function handleGameStarted() {
 }
 
 async function handleQuestion(q) {
-	await runTimedProgressBar("10s");
+	runTimedProgressBar("10s");
 	currentEvent.innerText = "A question has landed, answer it (10 seconds)!";
 
 	question.innerText = q.question;
@@ -250,21 +255,27 @@ async function handleQuestion(q) {
 }
 
 async function handleAnswerEvaluation(data) {
-	currentEvent.innerText = "The question has been evaluated, take a breather (5 seconds).";
-	await runTimedProgressBar("5s");
+	const modal = $("modal");
+	currentEvent.innerText = "The question has been evaluated, take a breather (10 seconds).";
+	runTimedProgressBar("5s");
 	
 	if (data.evaluation) {
+		playSound("/sounds/answer_correct.wav");
 		modal.style.backgroundColor = "#00FF0099";
+		modal.style.display = "block";
 		currentEvent = "Correct!";
 	} else {
+		playSound("/sounds/answer_incorrect.wav");
 		currentEvent = `Wrong. Correct answer was \"${data.correctAnswer}\"`;
 		modal.style.backgroundColor = "FF000099";
+		modal.style.display = "block";
 	}
 
 	refreshRoomData(data.roomState);
 
 	setTimeout(() => {
 		modal.style.backgroundColor = null;
+		modal.style.display = "none";
 	}, 2000);
 }
 

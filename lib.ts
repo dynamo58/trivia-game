@@ -85,7 +85,7 @@ export class Room {
             //  this as 10 secs, though)
             await sleep(10.1);
             this.evaluateAnswers();
-            await sleep(5);
+            await sleep(10);
         }
     }
 

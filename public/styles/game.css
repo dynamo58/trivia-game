@@ -99,8 +99,8 @@
 }
 
 .loaderWrapper {
-	width: 100%;
-	margin-top: 1em;
+	width: 70%;
+	margin: 1em auto;
 }
 
 .loaderBg {
@@ -111,14 +111,9 @@
 }
 
 #loader {
-	animation: loader-animation;
-	animation-iteration-count: 1;
-	animation-fill-mode: forwards;
-	animation-play-state: paused;
-	animation-timing-function: linear;
 	border-radius: 1em;
 	background-color: #ffbbec;
-	width: 50%;
+	margin: 0 auto;
 	height: 1em;
 }
 
@@ -127,6 +122,6 @@
 		width: 100%;
 	}
 	100% {
-		width: 0%
+		width: 0
 	}
 }
