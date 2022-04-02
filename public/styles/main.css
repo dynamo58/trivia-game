@@ -1,5 +1,26 @@
 @import url('https://fonts.googleapis.com/css?family=Trykker&display=swap');
 
+:root {
+	--accent:           #1b4ed0;
+	--accent2:          #8d39c1;
+	--background:       #171717;
+	--background-alt:   #252525;
+	--transparent-mask: #303030aa;
+	--serif:              'Trykker', serif;
+	--sans-serif:         'Segoe UI', Verdana, sans-serif;
+	--mono:               'Courier New', Courier, monospace;
+}
+
+::-moz-selection {
+	color:    #fff;
+	background: var(--accent2);
+}
+  
+::selection {
+	color:    #fff;
+	background: var(--accent2);
+}
+
 * {
 	box-sizing: border-box;
 }
@@ -8,7 +29,7 @@ body {
 	margin: 0;
 	padding: 0;
 	color: #fff;
-	background-color: #252525;
+	background-color: var(--background);
 	font-size: 1.125rem;
 }
 
@@ -26,36 +47,53 @@ a:visited {
 
 h1,
 h2,
-h3,
-.navbar__item {
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	color: #FFBBEC;
+h3 {
+	font-family: var(--sans-serif);
 }
 
 nav {
 	display: flex;
 	justify-content: center;
-	padding: .5em 0;
-	background-color: #303030;
+	align-items: center;
+	padding: .75em 0;
+	background-color: var(--accent);
 }
 
 .navbar__item {
-	margin: 0 3em;
-	padding: 0.1em;
+	text-transform: uppercase;
+	font-family: var(--sans-serif);
+	color: #fff;
+	padding: 0.4em;
 	font-size: 1.25em;
+	width: 225px;
+	text-align: center;
 }
+
+@media only screen and (max-width: 920px) {
+	nav {
+		flex-direction: column;
+	}
+
+	.navbar__item {
+		width: 100%;
+		border-bottom: 3px solid #fff;
+	}
+
+	.navbar__item:last-child {
+		border-bottom: none;
+	}
+}
+
 
 .navbar__item:hover {
 	cursor: pointer;
-}
-
-.navbar__item:hover {
-	color: rgb(68, 218, 255);
-	transition: all linear 0.15s;
+	text-shadow: .25px 0px .1px,
+                -.25px 0px .1px;
+	transition: text-shadow .3s;
 }
 
 p {
-	font-family: 'Trykker', serif;
+	font-family: var(--serif);
 }
 
 .article__section__heading {
@@ -74,16 +112,14 @@ p {
 
 .img_wrapper span {
 	display: inline-block;
-	margin: 0.3em;
+	margin: 0.5em;
 	padding: 0.3em 1em;
-	/* background-image: linear-gradient(180deg, #A9C9FF77, #FFBBEC77); */
-	border-bottom: 1px solid #FFBBEC;
-	border-radius: .7em;
+	background-color: #1b4ed077;
+	font-family: var(--mono);
+	border-radius: .4em;
 }
 
 .modal {
-	animation: all 1s linear;
-	display: none;
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -91,20 +127,33 @@ p {
 	height: 100%;
   	z-index: 1;
   	overflow: auto;
-	background-color: #303030aa;
+	background-color: var(--transparent-mask);
+	display: none;
 }
-	
+
 .modalContentWrapper {
+	position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+	max-height: 70vh;
+	overflow: scroll;
 	width: min(764px, 100vw);
-	margin: min(100px, 10vw) auto;
-	border-radius: 2em;
-	background: rgb(29,19,57);
-	background-image: linear-gradient(180deg, #A9C9FF55, #FFBBEC55);
+	/* margin: min(100px, 10vw) auto; */
+	border: 3px solid #fff;
+	background-color: var(--background);
+	text-align: center;
+}
+
+.modalHeading {
+	font-size: 1.4em;
+	font-family: var(--sans-serif);
 }
 
 .modalContent {
 	padding: 2em;
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-family: var(--sans-serif);
 }
 
 input {
@@ -119,11 +168,16 @@ label {
 
 .btn,
 .btn:focus {
-	background-image: linear-gradient(270deg, #A9C9FF, #FFBBEC);
-	color: #fff;
+	background-image: var(--accent);
 	outline: none !important;
 	border: none;
 	cursor: pointer;
+	padding: .3em .7em;
+	border-radius: 5px;
+}
+
+.rooms {
+	padding: 1.5em;
 }
 
 .roomBadge {
@@ -131,8 +185,11 @@ label {
 	margin: 1em auto;
 	text-align: center;
 	font-size: 1.2em;
-	font-weight: 600;
-	border: 4px solid #FFBBEC;
-	border-radius: 3em;
-	background-image: linear-gradient(270deg, #A9C9FF77, #FFBBEC77);
+	font-weight: 400;
+	border: 2px solid #fff;
+	background-color: var(--background-alt);
+}
+
+.roomBadge:hover {
+	background-color: var(--accent);
 }

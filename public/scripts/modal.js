@@ -2,7 +2,7 @@ const modal        = $("modal");
 const modalContent = $("modalContent");
 
 const CREATE_ROOM_MODAL_CONTENT = `
-	<p>Create your brand new room!</p>
+	<p class="modalHeading">Create your brand new room!</p>
 	<form autocomplete="off" id="createRoomForm">
 		<input
 			type="text"
@@ -30,6 +30,7 @@ const CREATE_ROOM_MODAL_CONTENT = `
 `;
 
 const BROWSE_ROOMS_MODAL_CONTENT = `
+	<p class="modalHeading">Connect to a room</p>
 	<div id="rooms" class="rooms"></div>
 `;
 

@@ -10,6 +10,14 @@ app.static("/", "./public");
 let rooms: Room[] = [
 	new Room("test_room1", null),
 	new Room("test_room2", null),
+	new Room("test_room3", null),
+	new Room("test_room4", null),
+	new Room("test_room5", null),
+	new Room("test_room6", null),
+	new Room("test_room7", null),
+	new Room("test_room8", null),
+	new Room("test_room9", null),
+	new Room("test_room10", null),
 ];
 
 import {

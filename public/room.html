@@ -18,24 +18,21 @@
 
 	<nav>
 		<div id="createRoom" class="navbar__item">Create room</div>
-		<a href="/"><div class="navbar__item">Tutorial</div></a>
+		<div class="navbar__item"><a href="/">Tutorial</a></div>
 		<div id="browseRooms" class="navbar__item">Browse rooms</div>
 	</nav>
 
-	<div class="playerStatus">
-		<div class="playerStatus__player1">
-			<div class="playerName" id="player1Name">No one joined yet</div>
-			<div class="playerScore" id="player1Score">0</div>
-		</div>
-		<div class="playerStatus__player2">
-			<div class="playerName" id="player2Name">No one has joined yet</div>
-			<div class="playerScore" id="player2Score">0</div>
-		</div>
-	</div>
-
 	<div class="spectators"><span style="font-weight: bold;">Spectators</span>: <span id="spectators"></span></div>
 
+	<div id="currentEvent">Waiting for players to join</div>
+
 	<div class="gameField">
+		<div class="playerStatus playerStatus__player1">
+			<div class="player1image"><img id="player1image" class="grayscale" src="/img/apu.webp" alt=""></div>
+			<div class="playerName" id="player1Name">Not yet joined</div>
+			<div class="playerScore" id="player1Score">0</div>
+		</div>
+		
 		<div class="question">
 			<div id="questionQuestion">In programming, the ternary operator is mostly defined with what symbol(s)?</div>
 			<div class="questionFields">
@@ -45,16 +42,20 @@
 				<div class="questionField" id="questionField4">if then</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="gameStatus">
-		<div id="currentEvent">Waiting for players to join</div>
-		<div class="loaderWrapper">
-			<div class="loaderBg">
-				<div id="loader"></div>
-			</div>
+		<div class="playerStatus playerStatus__player2">
+			<div class="player2image"><img id="player2image" class="grayscale" src="/img/upa.webp" alt=""></div>
+			<div class="playerName" id="player2Name">Not yet joined</div>
+			<div class="playerScore" id="player2Score">0</div>
 		</div>
 	</div>
+
+	<div class="loaderWrapper">
+		<div class="loaderBg">
+			<div id="loader"></div>
+		</div>
+	</div>
+
 	<script src="/scripts/modal.js"></script>
 	<script src="/scripts/room.js"></script>
 </body>

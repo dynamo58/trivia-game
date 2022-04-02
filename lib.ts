@@ -44,7 +44,7 @@ export class Room {
         this.spectators  = [];
         this.currQuestion = null;
         this.recdAnswers  = new Map();
-        this.isGame       = false
+        this.isGame       = false;
     }
 
     async sendQuestion() {
@@ -78,7 +78,7 @@ export class Room {
             }));
         }
 
-        while (true) {
+        while (this.isGame) {
             await this.sendQuestion();
             // give just a tiny bit of extra time
             // (the frontend should still treat
@@ -89,7 +89,7 @@ export class Room {
         }
     }
 
-    // 
+    // calculate the scores
     evaluateAnswers() {
         let results: Map<uuid, boolean> = new Map();
 

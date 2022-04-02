@@ -176,13 +176,30 @@ export const socket = async (
 						} : null,
 					}));
 					break;
-			}
+
+				case "questionAnswer":
+					if (_room?.isGame)
+						_room.recdAnswers.set(_uuid, data.answer_index);
+					break;
+				}
 		} catch {}
 	}
 
+	// this code is accessed whenever to socket loses connection
 	if (_room && _nickname) {
+		// stop game
+		if (
+			_room.player1?.uuid === _uuid ||
+			_room.player2?.uuid === _uuid
+		) {
+			_room.isGame = false;
+			console.log(`Room \`${_room.name}\` has been stopped due to ${userType} disconnecting`);
+		}
+
+		// release the socket
 		_room.sockets.delete(_uuid);
 
+		// clean up the Room object
 		switch (userType) {
 			case Participant.Player1:
 				_room.player1 = null;
@@ -196,7 +213,20 @@ export const socket = async (
 					_room.spectators.splice(index, 1);
 				break;
 		}
-		// console.log("he disconnected");
-		// console.log(_room);
+
+		// if the user was a player, instantly stop the game
+		// notify all of the users in the room
+		for (const [_, socket] of _room.sockets.entries())
+			socket.send(JSON.stringify({
+				action: "someoneDisconnected",
+				nickname: _nickname,
+				type: userType,
+				roomState: {
+					player1: _room.player1,
+					player2: _room.player2,
+					name:    _room.name,
+					spectators: _room.spectators
+				},
+			}));
 	}
 }

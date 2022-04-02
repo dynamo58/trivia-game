@@ -29,7 +29,7 @@ let client = {
 for (let i = 0; i < 4; i++)
 	questions[i].addEventListener("click", () => {
 		client.curr_chosen_index = i;
-		questions[i].style.backgroundColor = "#ffbbec77";
+		questions[i].style.backgroundColor = "var(--accent)";
 
 		let other_idxs = [0,1,2,3].filter(idx => idx !== i);
 		for (let idx of other_idxs)
@@ -72,8 +72,8 @@ ws.onmessage = async (evt) => {
 				await handleAnswerEvaluation(data);
 				break;
 
-			case "gameEnded":
-				handleGameEnded(data);
+			case "someoneDisconnected":
+				handleSomeoneDisconnected(data);
 				break;
 
 			case "someoneJoined":
@@ -140,14 +140,15 @@ function handle_connect_modal() {
 // frontend
 // --------
 
-function runTimedProgressBar(duration) {
-	bar.style.width = "100%";
-	bar.style.animation = "loader-animation";
+function runTimedProgressBar(duration, color) {
+	bar.style.width                   = "100%";
+	bar.style.animation               = "loader-animation";
 	bar.style.animationIterationCount = "1";
-	bar.style.fillMode = "forwards";
+	bar.style.fillMode                = "forwards";
 	bar.style.animationTimingFunction = "linear";
-	bar.style.animationDuration = duration;
-	bar.style.animationPlayState = 'running';
+	bar.style.animationDuration       = duration;
+	bar.style.animationPlayState      = 'running';
+	bar.style.color                   = color || "var(--accent)";
 	setTimeout(() => {
 		bar.style.width = "0";
 		bar.style.animation = null;
@@ -170,19 +171,25 @@ function playSound(url){
 // ---------
 
 function refreshRoomData(roomState) {
-	// console.log(roomState);
 	if (roomState.player1) {
 		player1name.innerText  = roomState.player1.nickname;
 		player1score.innerText = roomState.player1.score;
+		$("player1image").classList.remove("grayscale")
 	}
 
 	if (roomState.player2) {
 		player2name.innerText  = roomState.player2.nickname;
 		player2score.innerText = roomState.player2.score;
+		$("player2image").classList.remove("grayscale")
 	}
 	
 	document.getElementById("spectators").innerText =
 		roomState.spectators.join(", ");
+	
+	if (client.curr_chosen_index) {
+		questions[client.curr_chosen_index].style.backgroundColor = null;
+		client.curr_chosen_index = null;
+	}
 }
 
 // ----------
@@ -203,6 +210,13 @@ function joinRoom(nickname, password, participatorType) {
 		password: password,
 		participatorType: participatorType,
 		roomId: roomId()
+	}));
+}
+
+function sendAnswer() {
+	ws.send(JSON.stringify({
+		action: "questionAnswer",
+		answer_index: client.curr_chosen_index
 	}));
 }
 
@@ -245,19 +259,23 @@ function handleGameStarted() {
 }
 
 async function handleQuestion(q) {
-	runTimedProgressBar("10s");
+	runTimedProgressBar("10s", "#ff0000");
 	currentEvent.innerText = "A question has landed, answer it (10 seconds)!";
 
 	question.innerText = q.question;
 
 	for (let i = 0; i < 4; i++)
 		questions[i].innerText = q.all_answers[i];
+	
+	sleep(10).then(() => {
+
+	});
+	client.curr_chosen_index
 }
 
 async function handleAnswerEvaluation(data) {
-	const modal = $("modal");
 	currentEvent.innerText = "The question has been evaluated, take a breather (10 seconds).";
-	runTimedProgressBar("5s");
+	runTimedProgressBar("10s");
 	
 	if (data.evaluation) {
 		playSound("/sounds/answer_correct.wav");
@@ -279,17 +297,32 @@ async function handleAnswerEvaluation(data) {
 	}, 2000);
 }
 
-function handleGameEnded(data) {}
+function handleSomeoneDisconnected(data) {
+	switch (data.type) {
+		case "spectator":
+			spectators.innerText = data.spectators.join(", ");
+			break;
+		case "player1":
+			alert(`Player ${data.nickname} has disconnected, the game was aborted`);
+			$("player1image").classList.add("grayscale");
+			break;
+		case "player2":
+			alert(`Player ${data.nickname} has disconnected, the game was aborted`);
+			$("player2image").classList.add("grayscale");
+	}
+}
 
 function handleSomeoneJoined(data) {
 	switch (data.type) {
 		case "player1":
 			player1name.innerText  = data.nickname;
 			player1score.innerText = 0;
+			$("player1image").classList.add("grayscale");
 			break;
 		case "player2":
-			player1name.innerText  = data.nickname;
-			player1score.innerText = 0;
+			player2name.innerText  = data.nickname;
+			player2score.innerText = 0;
+			$("player2image").classList.add("grayscale");
 			break;
 
 		case "spectator":

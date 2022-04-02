@@ -1,10 +1,5 @@
 .playerStatus {
-	display: flex;
-	justify-content: space-around;
-	font-size: 1.125em;
-	padding: .5em 0;
-	background-color: #404040;
-	user-select: none;
+	margin: .7em !important;
 }
 
 .playerName {
@@ -12,9 +7,16 @@
 	font-weight: bold;
 }
 
-.playerScore,
+.playerScore {
+	color: var(--accent2);
+	font-size: 1.5em;
+	font-family: var(--mono);
+	font-weight: 700;
+	text-align: center;
+}
+
 .questionField {
-	color: #ffbbec;
+	color: var(--accent);
 }
 
 .spectators {
@@ -23,15 +25,25 @@
 }
 
 .gameField {
+	margin: 5em 0;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.gameField div {
+	margin: auto 0;
+}
+
+.question {
 	width: min(1024px, 100vw);
 	margin: 5em auto;
 	border: 3px solid #fff;
-	background: #303030;
-	border-radius: 2em;
+	background: var(--background);
 }
 
 #questionQuestion {
-	margin: 1em;
+	margin: 3em 0;
 	width: 100%;
 	text-align: center;
 	font-weight: 500;
@@ -41,36 +53,24 @@
 
 .questionFields div {
 	user-select: none;
-	width: 50%;
 	text-align: center;
-	padding: 1em 0;
+	padding: 0.7em;
+	flex-grow: 1;
+	width: 47%;
+	margin: 1.5%;
+	border: 3px solid #fff;
+	color: #fff;
 }
 
 .questionFields div:hover {
-	background-color: #6745b755;
+	background-color: var(--accent2);
 	cursor: pointer;
 }	
 
-.questionField:nth-last-child(2) {
-	border-bottom-left-radius: 2em;
-}
-
-.questionField:nth-last-child(1) {
-	border-bottom-right-radius: 2em;
-}
 
 @media only screen and (max-width: 500px) {
 	.questionFields div {
 		width: 100% !important;
-	}
-
-	.questionField:nth-last-child(2) {
-		border-bottom-left-radius: 0;
-	}
-
-	.questionField:nth-last-child(1) {
-		border-bottom-right-radius: 2em;
-		border-bottom-left-radius: 2em;
 	}
 }
 
@@ -82,7 +82,7 @@
 }
 
 .questionField {
-	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-family: var(--sans-serif);
 }
 
 #currentEvent {
@@ -90,12 +90,11 @@
 	text-align: center;
 	font-size: 1.125em;
 	font-style: italic;
+	margin-top: 2.5em;
 }
-
 
 .loaderWrapper {
 	width: 100%;
-	
 }
 
 .loaderWrapper {
@@ -107,12 +106,12 @@
 	border-radius: 1em;
 	width: 75%;
 	margin: 0 auto;
-	background: #303030;
+	background: var(--background-alt);
 }
 
 #loader {
 	border-radius: 1em;
-	background-color: #ffbbec;
+	background-color: var(--accent);
 	margin: 0 auto;
 	height: 1em;
 }
@@ -124,4 +123,8 @@
 	100% {
 		width: 0
 	}
+}
+
+.grayscale {
+	filter: grayscale(100%);
 }
