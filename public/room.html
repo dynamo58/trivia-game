@@ -5,7 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="/styles/main.css">
-	<link rel="stylesheet" href="/styles/game.css">
+	<link rel="stylesheet" href="/styles/room.css">
 	<script type="text/javascript" src="/scripts/shared.js"></script>
 	<title>Room</title>
 </head>
@@ -17,34 +17,37 @@
 	</div>
 
 	<nav>
-		<div id="createRoom" class="navbar__item">Create room</div>
+		<div class="navbar__item" id="createRoom" >Create room</div>
 		<div class="navbar__item"><a href="/">Tutorial</a></div>
-		<div id="browseRooms" class="navbar__item">Browse rooms</div>
+		<div class="navbar__item" id="browseRooms" >Browse rooms</div>
 	</nav>
 
-	<div class="spectators"><span style="font-weight: bold;">Spectators</span>: <span id="spectators"></span></div>
+	<div class="spectators">
+		<span style="font-weight: bold;">Spectators</span>:
+		<span id="spectators"></span>
+	</div>
 
 	<div id="currentEvent">Waiting for players to join</div>
 
 	<div class="gameField">
 		<div class="playerStatus playerStatus__player1">
-			<div class="player1image"><img id="player1image" class="grayscale" src="/img/apu.webp" alt=""></div>
+			<div><img id="player1image" class="grayscale playerImage" src="/img/apu.webp" alt=""></div>
 			<div class="playerName" id="player1Name">Not yet joined</div>
 			<div class="playerScore" id="player1Score">0</div>
 		</div>
 		
 		<div class="question">
-			<div id="questionQuestion">In programming, the ternary operator is mostly defined with what symbol(s)?</div>
+			<div id="questionQuestion">⠀</div>
 			<div class="questionFields">
-				<div class="questionField" id="questionField1">?:</div>
-				<div class="questionField" id="questionField2">??</div>
-				<div class="questionField" id="questionField3">?</div>
-				<div class="questionField" id="questionField4">if then</div>
+				<div class="questionField" id="questionField1">⠀</div>
+				<div class="questionField" id="questionField2">⠀</div>
+				<div class="questionField" id="questionField3">⠀</div>
+				<div class="questionField" id="questionField4">⠀</div>
 			</div>
 		</div>
 
 		<div class="playerStatus playerStatus__player2">
-			<div class="player2image"><img id="player2image" class="grayscale" src="/img/upa.webp" alt=""></div>
+			<div><img id="player2image" class="grayscale playerImage" src="/img/upa.webp" alt=""></div>
 			<div class="playerName" id="player2Name">Not yet joined</div>
 			<div class="playerScore" id="player2Score">0</div>
 		</div>

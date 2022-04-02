@@ -63,6 +63,7 @@ export class Room {
     }
 
     async handleGame() {
+        console.log(`Room \`${this.name}\` has started playing.`)
         for (const [_, socket] of this.sockets.entries()) {
             socket.send(JSON.stringify({
                 action: "gameStarting",
@@ -70,7 +71,6 @@ export class Room {
         }
         
         await sleep(5);
-        console.log(`Room \`${this.name}\` has started playing.`)
         
         for (const [_, socket] of this.sockets.entries()) {
             socket.send(JSON.stringify({
@@ -79,22 +79,31 @@ export class Room {
         }
 
         while (this.isGame) {
+            console.log("sending a question");
             await this.sendQuestion();
             // give just a tiny bit of extra time
             // (the frontend should still treat
             //  this as 10 secs, though)
-            await sleep(10.1);
+            console.log("question pending")
+            await sleep(9);
+            for (const [_, socket] of this.sockets.entries())
+                socket.send(JSON.stringify({action: "answerNow"}));
+            await sleep(2);
+            console.log("evaluating");
             this.evaluateAnswers();
+            console.log("taking a break");
             await sleep(10);
         }
     }
 
     // calculate the scores
     evaluateAnswers() {
+        
         let results: Map<uuid, boolean> = new Map();
 
         for (let [uuid, answer_idx] of this.recdAnswers.keys()) {
             if (this.player1?.uuid === uuid) {
+                console.log(this.currQuestion?.correct_answer_idx, parseInt(answer_idx));
                 if (this.currQuestion?.correct_answer_idx == parseInt(answer_idx)) {
                     results.set(uuid, true);
                     this.player1.score += 10;

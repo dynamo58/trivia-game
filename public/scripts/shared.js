@@ -1,7 +1,5 @@
-
 const $  = (r)  => document.getElementById(r);
-const $$ = (r)  => document.querySelector(r);
-const $$$ = (r) => document.querySelectorAll(r);
+const $$ = (r)  => document.querySelectorAll(r);
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 

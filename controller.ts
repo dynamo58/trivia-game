@@ -3,15 +3,12 @@ import { v4 } from "https://deno.land/std@0.132.0/uuid/mod.ts";
 import { Player, Participant, Room, is_room, println } from "./lib.ts";
 import { acceptWebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
 
-export const getEmote = async (c: Context) => {
-	const { emoteName } = c.params;
-	return c.file(`public/img/${emoteName}.webp`);
-}
-
+// serve home/root page
 export const getHome = async (c: Context) => {
     return c.file("public/index.html");
 }
 
+// return all of the open rooms
 export const getRooms = async (c: Context, rooms: Room[]) => {
 	return JSON.stringify({
 		status: 200,
@@ -23,10 +20,12 @@ export const getRooms = async (c: Context, rooms: Room[]) => {
 	});
 }
 
+// serve the room page
 export const getRoom = async (c: Context) => {
     return c.file("public/room.html");
 }
 
+// create a new room (called from frontend JS)
 export const createRoom = async (c: Context, rooms: Room[]) => {
 	const {
 		roomName,
@@ -54,6 +53,7 @@ export const createRoom = async (c: Context, rooms: Room[]) => {
 	}
 }
 
+// socket handler
 export const socket = async (
 	c:     Context,
 	rooms: Room[],
@@ -74,7 +74,7 @@ export const socket = async (
 	});
 
 	const _uuid = v4.generate();
-	let _logged: boolean = false;
+	console.log(_uuid);
 	let _nickname: string | null = null;
 	let _room: Room | null = null;
 	let userType: Participant = Participant.Spectator;
@@ -95,7 +95,6 @@ export const socket = async (
 						(room.password === null || roomPassword === room.password) &&
 						(!!data.nickname)
 					) {
-						_logged = true;
 						_room = room;
 						_nickname = data.nickname;
 
@@ -121,21 +120,19 @@ export const socket = async (
 						
 						room.sockets.set(_uuid, ws);
 
-						for (const [uuid, socket] of room.sockets.entries()) {
-							if (!(_uuid === uuid)) {
+						for (const [uuid, socket] of room.sockets.entries())
+							if (!(_uuid === uuid))
 								socket.send(JSON.stringify({
 									action: "someoneJoined",
 									type: userType,
 									nickname: data.nickname,
 								}));
-							}
-						}
 					}
 
 					if (!room)
-						errors.push("The room was not found");
+						errors.push("Room of specified name  was not found.");
 					if (!data.nickname)
-						errors.push("");
+						errors.push("No nickname supplied.");
 
 					ws.send(JSON.stringify({
 						action: "joinAnswer",
@@ -178,8 +175,10 @@ export const socket = async (
 					break;
 
 				case "questionAnswer":
-					if (_room?.isGame)
-						_room.recdAnswers.set(_uuid, data.answer_index);
+					console.log(_uuid, "=>", data.answer_idx);
+					if (_room?.isGame) {
+						_room.recdAnswers.set(_uuid, data.answerIndex);
+					}
 					break;
 				}
 		} catch {}

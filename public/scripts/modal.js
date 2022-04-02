@@ -49,11 +49,11 @@ const CONNECT_TO_ROOM_MODAL_CONTENT = `
 		name="connectRoomPassword"
 		id="connectRoomPassword"
 		placeholder="Room password"
-	><br><br>
+	><br class="passwordBR"><br class="passwordBR">
 	<select name="joinRoomAs" id="joinRoomAs">
 		<option value="player">Player</option>
 		<option value="spectator">Spectator</option>
-  	</select><br>
+  	</select>
 	<br><br><br>
 	<button
 		value="Join room"

@@ -1,14 +1,15 @@
-@import url('https://fonts.googleapis.com/css?family=Trykker&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Source Serif Pro&display=swap');
 
 :root {
 	--accent:           #1b4ed0;
+	--accent-mask:      #1b4ed077;
 	--accent2:          #8d39c1;
 	--background:       #171717;
 	--background-alt:   #252525;
 	--transparent-mask: #303030aa;
-	--serif:              'Trykker', serif;
-	--sans-serif:         'Segoe UI', Verdana, sans-serif;
-	--mono:               'Courier New', Courier, monospace;
+	--serif:            'Source Serif Pro', serif;
+	--sans-serif:       'Segoe UI', Verdana, sans-serif;
+	--mono:             'Courier New', Courier, monospace;
 }
 
 ::-moz-selection {
@@ -51,11 +52,15 @@ h3 {
 	font-family: var(--sans-serif);
 }
 
+p {
+	font-size: 1.27rem;
+}
+
 nav {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	padding: .75em 0;
+	padding: .5em 0;
 	background-color: var(--accent);
 }
 
@@ -67,6 +72,12 @@ nav {
 	font-size: 1.25em;
 	width: 225px;
 	text-align: center;
+}
+
+.navbar__item:hover,
+#createRoom:hover,
+#browseRooms:hover {
+	cursor: pointer;
 }
 
 @media only screen and (max-width: 920px) {
@@ -114,7 +125,7 @@ p {
 	display: inline-block;
 	margin: 0.5em;
 	padding: 0.3em 1em;
-	background-color: #1b4ed077;
+	background-color: var(--accent-mask);
 	font-family: var(--mono);
 	border-radius: .4em;
 }
@@ -156,10 +167,24 @@ p {
 	font-family: var(--sans-serif);
 }
 
-input {
-	padding: .3em;
+input[type="text"],
+input[type="password"] {
+	padding: .5em 1em;
 	font-size: .9em;
-	border-radius: 0.3em;
+	border-radius: 0;
+	border: 2px solid #fff;
+	background: var(--background);
+	color: #fff;
+}
+
+input[type="text"]:disabled,
+input[type="password"]:disabled {
+	background: var(--background-alt);
+}
+
+input[type="text"]:disabled:hover,
+input[type="password"]:disabled:hover {
+	cursor: not-allowed;
 }
 
 label {

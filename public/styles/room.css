@@ -1,5 +1,6 @@
 .playerStatus {
 	margin: .7em !important;
+	text-align: center;
 }
 
 .playerName {
@@ -12,7 +13,11 @@
 	font-size: 1.5em;
 	font-family: var(--mono);
 	font-weight: 700;
-	text-align: center;
+}
+
+.playerImage {
+	width: 156px;
+	height: 128px;
 }
 
 .questionField {
@@ -29,6 +34,12 @@
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
+}
+
+@media only screen and (max-width: 920px) {
+	.gameField {
+		flex-direction: column;
+	}
 }
 
 .gameField div {

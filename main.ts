@@ -1,8 +1,9 @@
 import { Application } from "https://deno.land/x/abc@v1.3.3/mod.ts";
 import { Context } from "https://deno.land/x/abc@v1.3.3/mod.ts";
 import { Room } from "./lib.ts";
+import { parse } from "https://deno.land/std/flags/mod.ts";
 
-const PORT: number = 3000;
+const PORT: number = parse(Deno.args)["p"] || 3000;
 
 const app = new Application();
 app.static("/", "./public");

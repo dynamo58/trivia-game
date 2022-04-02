@@ -1,4 +1,4 @@
-// frontent objects (some may be implicitly imported from `modal.js`)
+// some frontent objects (other ones may be implicitly imported from `modal.js`)
 const player1name  = $("player1Name");
 const player1score = $("player1Score");
 const player2name  = $("player2Name");
@@ -20,28 +20,37 @@ const currentEvent = $("currentEvent");
 
 const ws = new WebSocket(uri());
 
+// some of the retained info clumped together
 let client = {
 	userName: null,
 	password: null,
 	curr_chosen_index: null,
 };
 
+// change colors approprietly when clicking on the answers
 for (let i = 0; i < 4; i++)
 	questions[i].addEventListener("click", () => {
-		client.curr_chosen_index = i;
-		questions[i].style.backgroundColor = "var(--accent)";
+		if (client.curr_chosen_index === i) {
+			client.curr_chosen_index = null;
+			questions[i].style.backgroundColor = null;
+		} else {
+			client.curr_chosen_index = i;
+			questions[i].style.backgroundColor = "var(--accent)";
 
-		let other_idxs = [0,1,2,3].filter(idx => idx !== i);
-		for (let idx of other_idxs)
-			questions[idx].style.backgroundColor = null;
+			let other_idxs = [0,1,2,3].filter(idx => idx !== i);
+			for (let idx of other_idxs)
+				questions[idx].style.backgroundColor = null;
+		}
+		console.log({client});
 	});
 
-// handle incoming socket messages
+// handle when a socket connection has been made
 ws.onopen = (e) => {
 	console.log("Established a WebSocket connection");
 	getRoomInfo();
 }
 
+// handle incoming socket messages
 ws.onmessage = async (evt) => {
 	try {
 		const data = JSON.parse(evt.data);
@@ -66,6 +75,10 @@ ws.onmessage = async (evt) => {
 
 			case "question":
 				handleQuestion(data.question);
+				break;
+			
+			case "answerNow":
+				sendAnswer();
 				break;
 
 			case "answerEvaluation":
@@ -97,7 +110,7 @@ function roomId() {
 		.split("/")[window.location.toString().split("/").length-1];
 }
 
-// get websocket uri
+// get websocket uri based on the current url
 function uri() {
 	const loc = window.location;
 
@@ -114,7 +127,7 @@ function uri() {
 	return uri;
 }
 
-// 
+// handle the "connect to the room" modal
 function handle_connect_modal() {
 	$("joinRoomBtn").addEventListener("click", async (e) => {
 		e.preventDefault();
@@ -140,6 +153,7 @@ function handle_connect_modal() {
 // frontend
 // --------
 
+// run the countdown progress bar below game
 function runTimedProgressBar(duration, color) {
 	bar.style.width                   = "100%";
 	bar.style.animation               = "loader-animation";
@@ -155,13 +169,14 @@ function runTimedProgressBar(duration, color) {
 	}, parseInt(duration.split("s")[0]) * 1000);
 }
 
-function playSound(url){
+// play a sound by specifying the server path
+function playSound(path){
 	let audio = document.createElement('audio');
 	audio.style.display = "none";
-	audio.src = url;
+	audio.src = path;
 	audio.autoplay = true;
 	audio.onended = function(){
-	  	audio.remove() //Remove when played.
+	  	audio.remove()
 	};
 	document.body.appendChild(audio);
 }
@@ -170,22 +185,25 @@ function playSound(url){
 // data handlers
 // ---------
 
+// fill the dynamic parts with new data / clean up
 function refreshRoomData(roomState) {
+	// if roomState includes any of players, update their fields 
 	if (roomState.player1) {
 		player1name.innerText  = roomState.player1.nickname;
 		player1score.innerText = roomState.player1.score;
-		$("player1image").classList.remove("grayscale")
+		$("player1image").classList.remove("grayscale");
 	}
 
 	if (roomState.player2) {
 		player2name.innerText  = roomState.player2.nickname;
 		player2score.innerText = roomState.player2.score;
-		$("player2image").classList.remove("grayscale")
+		$("player2image").classList.remove("grayscale");
 	}
 	
-	document.getElementById("spectators").innerText =
-		roomState.spectators.join(", ");
+	// update the spectator list
+	spectators.innerText = roomState.spectators.join(", ");
 	
+	// de-highlight the selected element (if there is any)
 	if (client.curr_chosen_index) {
 		questions[client.curr_chosen_index].style.backgroundColor = null;
 		client.curr_chosen_index = null;
@@ -196,6 +214,7 @@ function refreshRoomData(roomState) {
 // ws senders
 // ----------
 
+// get info about the Room that client is in
 function getRoomInfo() {
 	ws.send(JSON.stringify({
 		action: "requestRoomInfo",
@@ -203,6 +222,7 @@ function getRoomInfo() {
 	}));
 }
 
+// request to join a room
 function joinRoom(nickname, password, participatorType) {
 	ws.send(JSON.stringify({
 		action: "join",
@@ -213,10 +233,12 @@ function joinRoom(nickname, password, participatorType) {
 	}));
 }
 
+// send the answer to a question
 function sendAnswer() {
+	console.log("sent", {client});
 	ws.send(JSON.stringify({
 		action: "questionAnswer",
-		answer_index: client.curr_chosen_index
+		answerIndex: client.curr_chosen_index
 	}));
 }
 
@@ -224,21 +246,26 @@ function sendAnswer() {
 // ws handlers
 // -----------
 
+// handle response to `getRoomInfo()`
 function handleGetRoomInfoAnswer(data) {
 	if (data.success) {
 		showModal(CONNECT_TO_ROOM_MODAL_CONTENT);
 		handle_connect_modal();
 
 		if (!data.paswordRequired) {
-			$("connectRoomPassword").setAttribute("disabled", "disabled");
-		} else {
-			$("connectRoomPassword").removeAttribute("disabled");
+			$("connectRoomPassword").style.display = "none";
+			for (let br of document.querySelectorAll(".passwordBR")) {
+				br.remove();
+			}
 		}
-	} else {
+		else {
+			$("connectRoomPassword").style.display = "block";
+		}
+	} else
 		alert(`Couldn't find room\n\n\n, ${data.errors.join("\n")}`);
-	}
 }
 
+// handle response after `joinRoom()`
 function handleJoinAnwer(data) {
 	if (data.success) {
 		refreshRoomData(data.roomState);
@@ -247,35 +274,36 @@ function handleJoinAnwer(data) {
 		alert(`Couldn't join room\n\n\n, ${data.errors.join("\n")}`);
 }
 
+// handle the starting of a room
 async function handleGameStarting() {
 	currentEvent.innerText = "Game is starting shortly, get ready!";
 	playSound("/sounds/game_starting.mp3");
-	runTimedProgressBar("5s");
+	runTimedProgressBar("5s", "#f70");
 }
 
+// handle when the room actually starts
 function handleGameStarted() {
 	playSound("/sounds/game_started.mp3");
 	currentEvent.innerText = "The game has started. Watch out for incoming questions!";
 }
 
+// handle a question being sent
 async function handleQuestion(q) {
-	runTimedProgressBar("10s", "#ff0000");
+	runTimedProgressBar("10s", "#ff0");
 	currentEvent.innerText = "A question has landed, answer it (10 seconds)!";
 
-	question.innerText = q.question;
+	// those have to be `innerHtml` instead,
+	// because it might include html entities
+	question.innerHTML = q.question;
 
 	for (let i = 0; i < 4; i++)
-		questions[i].innerText = q.all_answers[i];
-	
-	sleep(10).then(() => {
-
-	});
-	client.curr_chosen_index
+		questions[i].innerHTML = q.all_answers[i];
 }
 
+// handle the incoming report about question
 async function handleAnswerEvaluation(data) {
 	currentEvent.innerText = "The question has been evaluated, take a breather (10 seconds).";
-	runTimedProgressBar("10s");
+	runTimedProgressBar("10s", "#0f0");
 	
 	if (data.evaluation) {
 		playSound("/sounds/answer_correct.wav");
@@ -297,6 +325,7 @@ async function handleAnswerEvaluation(data) {
 	}, 2000);
 }
 
+// what to do when someone has disconnected
 function handleSomeoneDisconnected(data) {
 	switch (data.type) {
 		case "spectator":
@@ -312,17 +341,18 @@ function handleSomeoneDisconnected(data) {
 	}
 }
 
+// what to do when someone has connected
 function handleSomeoneJoined(data) {
 	switch (data.type) {
 		case "player1":
 			player1name.innerText  = data.nickname;
 			player1score.innerText = 0;
-			$("player1image").classList.add("grayscale");
+			$("player1image").classList.remove("grayscale");
 			break;
 		case "player2":
 			player2name.innerText  = data.nickname;
 			player2score.innerText = 0;
-			$("player2image").classList.add("grayscale");
+			$("player2image").classList.remove("grayscale");
 			break;
 
 		case "spectator":
