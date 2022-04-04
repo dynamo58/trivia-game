@@ -80,10 +80,9 @@ export const socket = async (
 	let userType: Participant = Participant.Spectator;
 
 	for await (const e of ws) {
+		console.log(`recd, ${userType}`);
 		try {
 			const data = JSON.parse(e.toString());
-			console.log(data);
-
 			switch (data.action) {
 				case "join":
 					let joined_as_player = false;
@@ -97,6 +96,8 @@ export const socket = async (
 					) {
 						_room = room;
 						_nickname = data.nickname;
+
+						console.log(`User ${_nickname} joined room ${_room.name}`);
 
 						if (room.player1 == null &&
 							data.participatorType === "player"
@@ -160,6 +161,7 @@ export const socket = async (
 					break;
 			
 				case "requestRoomInfo":
+					console.log("daaanl")
 					let room_ = is_room(rooms, data.roomId);
 					ws.send(JSON.stringify({
 						action: "getRoomInfoAnswer",
@@ -175,17 +177,23 @@ export const socket = async (
 					break;
 
 				case "questionAnswer":
-					console.log(_uuid, "=>", data.answer_idx);
+					console.log("aaaaa");
+					console.log(`${_nickname} (${_uuid}) => ${data.answerIdx}`);
 					if (_room?.isGame) {
 						_room.recdAnswers.set(_uuid, data.answerIndex);
 					}
 					break;
-				}
-		} catch {}
+			}
+		} catch {
+			console.log("bruh", e);
+		}
 	}
+
+	if (userType === Participant.Player2) console.log("player2broke řřřřřřřřřřřřřřřřřřřřřřřřřřřřřřřřřř");
 
 	// this code is accessed whenever to socket loses connection
 	if (_room && _nickname) {
+		console.log(`User ${_nickname} has disconnected from ${_room.name}`);
 		// stop game
 		if (
 			_room.player1?.uuid === _uuid ||

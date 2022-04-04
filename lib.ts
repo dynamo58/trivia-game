@@ -51,7 +51,7 @@ export class Room {
         let q = (await fetchQuestion(1))[0];
         this.currQuestion = q;
 
-        for (let [_, ws] of this.sockets) {
+        for (let [_, ws] of this.sockets.entries()) {
             ws.send(JSON.stringify({
                 action: "question",
                 question: {
@@ -98,10 +98,10 @@ export class Room {
 
     // calculate the scores
     evaluateAnswers() {
-        
+        console.log(this.recdAnswers);
         let results: Map<uuid, boolean> = new Map();
 
-        for (let [uuid, answer_idx] of this.recdAnswers.keys()) {
+        for (const [uuid, answer_idx] of this.recdAnswers.keys()) {
             if (this.player1?.uuid === uuid) {
                 console.log(this.currQuestion?.correct_answer_idx, parseInt(answer_idx));
                 if (this.currQuestion?.correct_answer_idx == parseInt(answer_idx)) {
@@ -120,7 +120,7 @@ export class Room {
             }
         }
 
-        for (let [uuid, ws] of this.sockets) {
+        for (const [uuid, ws] of this.sockets.entries()) {
             ws.send(JSON.stringify({
                 action: "answerEvaluation",
                 evaluation: results.get(uuid),

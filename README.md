@@ -8,20 +8,21 @@
 
 # About
 
-Play simple trivia games against your friends; a simple web-based game written in Deno with web sockets. Purpose of this project is portfolio and learning Deno.
+Play trivia games against your friends; a simple web-based game written in Deno with web sockets. Purpose of this project is portfolio and learning Deno.
 
 <br><br>
 
 # Run yourself
-
-Requirements:
-* [Deno](https://deno.land/) being locally available
 
 ```
 git clone https://github.com/dynamo58/trivia-game
 cd trivia-game
 deno run --allow-net --allow-read main.ts
 ```
+
+### Requirements:
+
+* [Deno](https://deno.land/) being locally available
 
 ### Obligatory CLI arguments/flags:
 

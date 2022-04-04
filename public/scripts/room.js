@@ -45,7 +45,7 @@ for (let i = 0; i < 4; i++)
 	});
 
 // handle when a socket connection has been made
-ws.onopen = (e) => {
+ws.onopen = (_) => {
 	console.log("Established a WebSocket connection");
 	getRoomInfo();
 }
@@ -240,6 +240,7 @@ function sendAnswer() {
 		action: "questionAnswer",
 		answerIndex: client.curr_chosen_index
 	}));
+	console.log("b");
 }
 
 // -----------
@@ -309,10 +310,10 @@ async function handleAnswerEvaluation(data) {
 		playSound("/sounds/answer_correct.wav");
 		modal.style.backgroundColor = "#00FF0099";
 		modal.style.display = "block";
-		currentEvent = "Correct!";
+		currentEvent.innerText = "Correct!";
 	} else {
 		playSound("/sounds/answer_incorrect.wav");
-		currentEvent = `Wrong. Correct answer was \"${data.correctAnswer}\"`;
+		currentEvent.innerText = `Wrong. Correct answer was \"${data.correctAnswer}\"`;
 		modal.style.backgroundColor = "FF000099";
 		modal.style.display = "block";
 	}
