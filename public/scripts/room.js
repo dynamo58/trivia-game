@@ -34,6 +34,7 @@ for (let i = 0; i < 4; i++)
 			client.curr_chosen_index = null;
 			questions[i].style.backgroundColor = null;
 		} else {
+			sendAnswer();
 			client.curr_chosen_index = i;
 			questions[i].style.backgroundColor = "var(--accent)";
 
@@ -41,7 +42,6 @@ for (let i = 0; i < 4; i++)
 			for (let idx of other_idxs)
 				questions[idx].style.backgroundColor = null;
 		}
-		console.log({client});
 	});
 
 // handle when a socket connection has been made
@@ -54,8 +54,6 @@ ws.onopen = (_) => {
 ws.onmessage = async (evt) => {
 	try {
 		const data = JSON.parse(evt.data);
-		console.log(data);
-
 		switch (data.action) {
 			case "getRoomInfoAnswer":
 				handleGetRoomInfoAnswer(data);
@@ -135,9 +133,6 @@ function handle_connect_modal() {
 		const nickname = $("connectRoomNickname").value;
 		const password = $("connectRoomPassword").value;
 		const particip = $("joinRoomAs").options[$("joinRoomAs").selectedIndex].value;
-
-		console.log({particip});
-
 
 		if (nickname == "") {
 			alert("You must choose a name");
@@ -235,12 +230,10 @@ function joinRoom(nickname, password, participatorType) {
 
 // send the answer to a question
 function sendAnswer() {
-	console.log("sent", {client});
 	ws.send(JSON.stringify({
 		action: "questionAnswer",
 		answerIndex: client.curr_chosen_index
 	}));
-	console.log("b");
 }
 
 // -----------
@@ -308,22 +301,21 @@ async function handleAnswerEvaluation(data) {
 	
 	if (data.evaluation) {
 		playSound("/sounds/answer_correct.wav");
-		modal.style.backgroundColor = "#00FF0099";
-		modal.style.display = "block";
+		$("answerModal").style.backgroundColor = "#00FF0077";
 		currentEvent.innerText = "Correct!";
 	} else {
 		playSound("/sounds/answer_incorrect.wav");
 		currentEvent.innerText = `Wrong. Correct answer was \"${data.correctAnswer}\"`;
-		modal.style.backgroundColor = "FF000099";
-		modal.style.display = "block";
+		$("answerModal").style.backgroundColor = "#FF000077";
 	}
-
+	$("answerModal").style.display = "block";
+	
 	refreshRoomData(data.roomState);
 
 	setTimeout(() => {
-		modal.style.backgroundColor = null;
-		modal.style.display = "none";
-	}, 2000);
+		$("answerModal").style.backgroundColor = null;
+		$("answerModal").style.display = "none";
+	}, 3000);
 }
 
 // what to do when someone has disconnected

@@ -53,12 +53,16 @@ export const createRoom = async (c: Context, rooms: Room[]) => {
 	}
 }
 
+import { HandlerFunc } from "https://deno.land/x/abc@v1.3.3/types.ts";
+
 // socket handler
 export const socket = async (
 	c:     Context,
 	rooms: Room[],
 ) => {
-	const { roomPassword } = await c.body as { roomPassword: string };
+
+	const test: HandlerFunc = async (c) => {
+		const { roomPassword } = await c.body as { roomPassword: string };
 
 	const {
 		conn,
@@ -73,14 +77,12 @@ export const socket = async (
 		bufWriter,
 	});
 
-	const _uuid = v4.generate();
-	console.log(_uuid);
-	let _nickname: string | null = null;
-	let _room: Room | null = null;
-	let userType: Participant = Participant.Spectator;
+	const _uuid                    = v4.generate();
+	let   _nickname: string | null = null;
+	let   _room:       Room | null = null;
+	let   userType:    Participant = Participant.Spectator;
 
 	for await (const e of ws) {
-		console.log(`recd, ${userType}`);
 		try {
 			const data = JSON.parse(e.toString());
 			switch (data.action) {
@@ -156,12 +158,11 @@ export const socket = async (
 						room.player2
 					) {
 						room.isGame = true;
-						await room.handleGame();
+						room.handleGame();
 					}
 					break;
 			
 				case "requestRoomInfo":
-					console.log("daaanl")
 					let room_ = is_room(rooms, data.roomId);
 					ws.send(JSON.stringify({
 						action: "getRoomInfoAnswer",
@@ -177,8 +178,6 @@ export const socket = async (
 					break;
 
 				case "questionAnswer":
-					console.log("aaaaa");
-					console.log(`${_nickname} (${_uuid}) => ${data.answerIdx}`);
 					if (_room?.isGame) {
 						_room.recdAnswers.set(_uuid, data.answerIndex);
 					}
@@ -189,8 +188,6 @@ export const socket = async (
 		}
 	}
 
-	if (userType === Participant.Player2) console.log("player2broke řřřřřřřřřřřřřřřřřřřřřřřřřřřřřřřřřř");
-
 	// this code is accessed whenever to socket loses connection
 	if (_room && _nickname) {
 		console.log(`User ${_nickname} has disconnected from ${_room.name}`);
@@ -198,10 +195,8 @@ export const socket = async (
 		if (
 			_room.player1?.uuid === _uuid ||
 			_room.player2?.uuid === _uuid
-		) {
+		)
 			_room.isGame = false;
-			console.log(`Room \`${_room.name}\` has been stopped due to ${userType} disconnecting`);
-		}
 
 		// release the socket
 		_room.sockets.delete(_uuid);
@@ -236,4 +231,6 @@ export const socket = async (
 				},
 			}));
 	}
+	}
+	await test(c);
 }

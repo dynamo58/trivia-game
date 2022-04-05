@@ -79,32 +79,26 @@ export class Room {
         }
 
         while (this.isGame) {
-            console.log("sending a question");
             await this.sendQuestion();
             // give just a tiny bit of extra time
             // (the frontend should still treat
             //  this as 10 secs, though)
-            console.log("question pending")
             await sleep(9);
             for (const [_, socket] of this.sockets.entries())
                 socket.send(JSON.stringify({action: "answerNow"}));
             await sleep(2);
-            console.log("evaluating");
             this.evaluateAnswers();
-            console.log("taking a break");
             await sleep(10);
         }
     }
 
     // calculate the scores
     evaluateAnswers() {
-        console.log(this.recdAnswers);
         let results: Map<uuid, boolean> = new Map();
 
-        for (const [uuid, answer_idx] of this.recdAnswers.keys()) {
+        for (let [uuid, answer_idx] of this.recdAnswers.entries()) {
             if (this.player1?.uuid === uuid) {
-                console.log(this.currQuestion?.correct_answer_idx, parseInt(answer_idx));
-                if (this.currQuestion?.correct_answer_idx == parseInt(answer_idx)) {
+                if (this.currQuestion?.correct_answer_idx == answer_idx) {
                     results.set(uuid, true);
                     this.player1.score += 10;
                 } else
@@ -112,7 +106,7 @@ export class Room {
             }
 
             if (this.player2?.uuid === uuid) {
-                if (this.currQuestion?.correct_answer_idx == parseInt(answer_idx)) {
+                if (this.currQuestion?.correct_answer_idx == answer_idx) {
                     results.set(uuid, true);
                     this.player2.score += 10;
                 } else

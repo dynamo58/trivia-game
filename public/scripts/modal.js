@@ -120,7 +120,6 @@ window.onclick = async function(event) {
 			})
 				.then(res => res.json())
 				.then(data => {
-					console.log(data);
 					switch (data.status) {
 						case 200:
 							window.location = `${data.roomLocation}`;
