@@ -85,6 +85,7 @@ function showModal(html) {
 
 function hideModal() {
 	modal.style.display = "none";
+	$$(".scoreboardWrapper")[0].style.display = "none";
 }
 
 window.onclick = async function(event) {

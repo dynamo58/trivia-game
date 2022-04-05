@@ -22,46 +22,48 @@ export type uuid = string;
 // represents a room/lobby of an instance
 // of an ongoing game
 export class Room {
-    public sockets:      Map<uuid, WebSocket>;
-    public recdAnswers:  Map<uuid, number>;
-	public player1:      Player | null;
-	public player2:      Player | null;
-	public name:         string;
-    public spectators:   string[];
-	public currQuestion: Question | null;
-    public isGame:       boolean;
-    password:            string | null;
+    public sockets:       Map<uuid, WebSocket>;
+    public recdAnswers:   Map<uuid, number>;
+	public player1:       Player | null;
+	public player2:       Player | null;
+	public name:          string;
+    public spectators:    string[];
+	public questionQueue: Question[] | null;
+    public isGame:        boolean;
+    password:             string | null;
     
     constructor(
         name: string,
         pw:   string | null,
     ) {
-        this.player1     = null;
-        this.player2     = null;
-        this.name        = name;
-        this.password    = pw;
-        this.sockets     = new Map();
-        this.spectators  = [];
-        this.currQuestion = null;
-        this.recdAnswers  = new Map();
-        this.isGame       = false;
+        this.player1       = null;
+        this.player2       = null;
+        this.name          = name;
+        this.password      = pw;
+        this.sockets       = new Map();
+        this.spectators    = [];
+        this.questionQueue = null;
+        this.recdAnswers   = new Map();
+        this.isGame        = false;
     }
 
+    // send question to all clients
     async sendQuestion() {
-        let q = (await fetchQuestion(1))[0];
-        this.currQuestion = q;
+        let q = this.questionQueue![0];
 
         for (let [_, ws] of this.sockets.entries()) {
             ws.send(JSON.stringify({
                 action: "question",
+                questionNumber: 21 - this.questionQueue!.length,
                 question: {
-                    question: q.question,
-                    all_answers: q.all_answers,
-                }
+                    question: q?.question,
+                    all_answers: q?.all_answers,
+                },
             }));
         }
     }
 
+    // handle an on-going game
     async handleGame() {
         console.log(`Room \`${this.name}\` has started playing.`)
         for (const [_, socket] of this.sockets.entries()) {
@@ -69,6 +71,8 @@ export class Room {
                 action: "gameStarting",
             }));
         }
+
+        this.questionQueue = await fetchQuestion(20);
         
         await sleep(5);
         
@@ -80,16 +84,31 @@ export class Room {
 
         while (this.isGame) {
             await this.sendQuestion();
-            // give just a tiny bit of extra time
+            // give slightly more time than 10 secs
+            // in order to compensate for some delay
+            // that may occur;
             // (the frontend should still treat
             //  this as 10 secs, though)
-            await sleep(9);
-            for (const [_, socket] of this.sockets.entries())
-                socket.send(JSON.stringify({action: "answerNow"}));
-            await sleep(2);
+            await sleep(10.7);
             this.evaluateAnswers();
-            await sleep(10);
+            this.questionQueue.shift();
+
+            if (this.questionQueue.length === 0)
+                break;
+            else 
+                await sleep(10);
         }
+
+        for (const [_, socket] of this.sockets.entries())
+            socket.send(JSON.stringify({
+                action: "gameEnded",
+                roomState: {
+                    name:       this.name,
+                    player1:    this.player1,
+                    player2:    this.player2,
+                    spectators: this.spectators
+                }
+            }));
     }
 
     // calculate the scores
@@ -98,7 +117,7 @@ export class Room {
 
         for (let [uuid, answer_idx] of this.recdAnswers.entries()) {
             if (this.player1?.uuid === uuid) {
-                if (this.currQuestion?.correct_answer_idx == answer_idx) {
+                if (this.questionQueue![0].correct_answer_idx == answer_idx) {
                     results.set(uuid, true);
                     this.player1.score += 10;
                 } else
@@ -106,7 +125,7 @@ export class Room {
             }
 
             if (this.player2?.uuid === uuid) {
-                if (this.currQuestion?.correct_answer_idx == answer_idx) {
+                if (this.questionQueue![0].correct_answer_idx == answer_idx) {
                     results.set(uuid, true);
                     this.player2.score += 10;
                 } else
@@ -118,7 +137,7 @@ export class Room {
             ws.send(JSON.stringify({
                 action: "answerEvaluation",
                 evaluation: results.get(uuid),
-                correctAnswer: this.currQuestion?.all_answers[this.currQuestion?.correct_answer_idx],
+                correctAnswer: this.questionQueue![0].all_answers[this.questionQueue![0].correct_answer_idx],
                 roomState: {
                     name:       this.name,
                     player1:    this.player1,
@@ -186,7 +205,7 @@ export function shuffle(arr: any[]) {
 export async function fetchQuestion(amount: number): Promise<Question[]> {
     let num = Math.floor(clamp(amount, 1, 50));
 
-    return await fetch(`https://opentdb.com/api.php?amount=${num}&category=18`, {
+    return await fetch(`https://opentdb.com/api.php?amount=${num}&category=18&type=multiple`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"

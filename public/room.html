@@ -10,6 +10,24 @@
 	<title>Room</title>
 </head>
 <body>
+	<div class="scoreboardWrapper">
+		<div id="scoreboard">
+			<p class="scoreboardHeading">Final Score</p>
+			<div class="scoreboardPlayerField">
+				<div>
+					<img class="playerImage" src="/img/apu.webp" alt="">
+					<div class="playerName" id="p1name">⠀</div>
+					<div class="playerScore" id="p1score">⠀</div>
+				</div>
+				<div>
+					<img class="playerImage" src="/img/upa.webp" alt="">
+					<div class="playerName" id="p2name">⠀</div>
+					<div class="playerScore" id="p2score">⠀</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div id="answerModal"></div>
 
 	<div id="modal" class="modal">
@@ -39,6 +57,7 @@
 		</div>
 		
 		<div class="question">
+			<div class="questionNumber" id="questionNumber">⠀</div>
 			<div id="questionQuestion">⠀</div>
 			<div class="questionFields">
 				<div class="questionField" id="questionField1">⠀</div>

@@ -60,7 +60,6 @@ export const socket = async (
 	c:     Context,
 	rooms: Room[],
 ) => {
-
 	const test: HandlerFunc = async (c) => {
 		const { roomPassword } = await c.body as { roomPassword: string };
 
@@ -178,6 +177,7 @@ export const socket = async (
 					break;
 
 				case "questionAnswer":
+					console.log(`${userType} => ${data.answerIndex}`)
 					if (_room?.isGame) {
 						_room.recdAnswers.set(_uuid, data.answerIndex);
 					}

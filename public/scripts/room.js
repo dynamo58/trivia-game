@@ -34,9 +34,9 @@ for (let i = 0; i < 4; i++)
 			client.curr_chosen_index = null;
 			questions[i].style.backgroundColor = null;
 		} else {
-			sendAnswer();
 			client.curr_chosen_index = i;
 			questions[i].style.backgroundColor = "var(--accent)";
+			sendAnswer();
 
 			let other_idxs = [0,1,2,3].filter(idx => idx !== i);
 			for (let idx of other_idxs)
@@ -72,7 +72,7 @@ ws.onmessage = async (evt) => {
 				break;
 
 			case "question":
-				handleQuestion(data.question);
+				handleQuestion(data.question, data.questionNumber);
 				break;
 			
 			case "answerNow":
@@ -81,6 +81,10 @@ ws.onmessage = async (evt) => {
 
 			case "answerEvaluation":
 				await handleAnswerEvaluation(data);
+				break;
+			
+			case "gameEnded":
+				await handleGameEnded(data);
 				break;
 
 			case "someoneDisconnected":
@@ -157,7 +161,7 @@ function runTimedProgressBar(duration, color) {
 	bar.style.animationTimingFunction = "linear";
 	bar.style.animationDuration       = duration;
 	bar.style.animationPlayState      = 'running';
-	bar.style.color                   = color || "var(--accent)";
+	bar.style.backgroundColor         = color || "var(--accent)";
 	setTimeout(() => {
 		bar.style.width = "0";
 		bar.style.animation = null;
@@ -282,9 +286,11 @@ function handleGameStarted() {
 }
 
 // handle a question being sent
-async function handleQuestion(q) {
-	runTimedProgressBar("10s", "#ff0");
+async function handleQuestion(q, qNum) {
+	currentEvent.style.color = "#fff";
+	runTimedProgressBar("10s", "#f00");
 	currentEvent.innerText = "A question has landed, answer it (10 seconds)!";
+	$("questionNumber").innerText = `${qNum}/20`;
 
 	// those have to be `innerHtml` instead,
 	// because it might include html entities
@@ -298,15 +304,22 @@ async function handleQuestion(q) {
 async function handleAnswerEvaluation(data) {
 	currentEvent.innerText = "The question has been evaluated, take a breather (10 seconds).";
 	runTimedProgressBar("10s", "#0f0");
-	
+
+	for (let q of questions)
+		q.style.backgroundColor = null;
+
+	client.curr_chosen_index = null;
+
 	if (data.evaluation) {
 		playSound("/sounds/answer_correct.wav");
 		$("answerModal").style.backgroundColor = "#00FF0077";
 		currentEvent.innerText = "Correct!";
+		currentEvent.style.color = "#0f0";
 	} else {
 		playSound("/sounds/answer_incorrect.wav");
-		currentEvent.innerText = `Wrong. Correct answer was \"${data.correctAnswer}\"`;
+		currentEvent.innerHTML = `Wrong. Correct answer was \"${data.correctAnswer}\"`;
 		$("answerModal").style.backgroundColor = "#FF000077";
+		currentEvent.style.color = "#f00";
 	}
 	$("answerModal").style.display = "block";
 	
@@ -352,4 +365,16 @@ function handleSomeoneJoined(data) {
 			spectators.innerText += ", " + data.nickname;
 			break;
 	}
+}
+
+// show scoreboard and stuff
+// when the game has ended
+function handleGameEnded(data) {
+	let state = data.roomState;
+
+	$("p1name").innerText = state.player1.name;
+	$("p1score").innerText = state.player1.score;
+	$("p2name").innerText = state.player2.name;
+	$("p2score").innerText = state.player2.score;
+	$("scoreboardWrapper").style.display = "flex";
 }
