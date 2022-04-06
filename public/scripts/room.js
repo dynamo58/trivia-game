@@ -84,7 +84,7 @@ ws.onmessage = async (evt) => {
 				break;
 			
 			case "gameEnded":
-				await handleGameEnded(data);
+				handleGameEnded(data);
 				break;
 
 			case "someoneDisconnected":
@@ -370,11 +370,9 @@ function handleSomeoneJoined(data) {
 // show scoreboard and stuff
 // when the game has ended
 function handleGameEnded(data) {
-	let state = data.roomState;
-
-	$("p1name").innerText = state.player1.name;
-	$("p1score").innerText = state.player1.score;
-	$("p2name").innerText = state.player2.name;
-	$("p2score").innerText = state.player2.score;
+	$("p1name").innerText = data.roomState.player1.nickname;
+	$("p1score").innerText = data.roomState.player1.score;
+	$("p2name").innerText = data.roomState.player2.nickname;
+	$("p2score").innerText = data.roomState.player2.score;
 	$("scoreboardWrapper").style.display = "flex";
 }
