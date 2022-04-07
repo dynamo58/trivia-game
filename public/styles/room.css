@@ -53,8 +53,12 @@
 	background: var(--background);
 }
 
+#questionNumber {
+	padding: .3em;
+}
+
 #questionQuestion {
-	margin: 3em 0;
+	margin: 3em 0.6em;
 	width: 100%;
 	text-align: center;
 	font-weight: 500;
@@ -174,7 +178,7 @@
 
 .scoreboardPlayerField {
 	display: flex;
-	justify-content: space-around;
+	justify-content: space-evenly;
 }
 
 .scoreboardHeading {

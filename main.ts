@@ -1,6 +1,6 @@
 import { Application } from "https://deno.land/x/abc@v1.3.3/mod.ts";
 import { Context } from "https://deno.land/x/abc@v1.3.3/mod.ts";
-import { Room } from "./lib.ts";
+import { Room, println } from "./lib.ts";
 import { parse } from "https://deno.land/std/flags/mod.ts";
 
 const PORT: number = parse(Deno.args)["p"] || 3000;
@@ -11,14 +11,6 @@ app.static("/", "./public");
 let rooms: Room[] = [
 	new Room("test_room1", null),
 	new Room("test_room2", null),
-	new Room("test_room3", null),
-	new Room("test_room4", null),
-	new Room("test_room5", null),
-	new Room("test_room6", null),
-	new Room("test_room7", null),
-	new Room("test_room8", null),
-	new Room("test_room9", null),
-	new Room("test_room10", null),
 ];
 
 import {
@@ -41,4 +33,4 @@ app
 	.get("/ws/:roomId", (c: Context) => socket(c, rooms))
 	.start({ port: PORT });
 
-await Deno.stdout.write(new TextEncoder().encode(`App listening on http://localhost:${PORT}/\n`));
+await println(`App listening on http://localhost:${PORT}/\n`);

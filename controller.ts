@@ -29,28 +29,29 @@ export const getRoom = async (c: Context) => {
 export const createRoom = async (c: Context, rooms: Room[]) => {
 	const {
 		roomName,
-		roomPassword
+		roomPassword,
 	} = await c.body as {
 		roomName: string,
-		roomPassword: string | null
+		roomPassword: string | null,
 	};
 
 	// check again if the requirements are met
 	if (roomName && !roomName.includes(" ")) {
 		rooms.push(new Room(roomName, roomPassword));
 		await println(`New room \`${roomName}\` created`);
-
+ 
 		return JSON.stringify({
 			status: 200,
 			message: "Room created successfully",
 			roomLocation: `/room/${roomName}`,
 		});
-	} else {
+	} else
+		// the sender did a little trolling
+		// and that's fine
 		return JSON.stringify({
 			status: 400,
-			message: "Bad request",
-		})
-	}
+			message: "You cheeky ...",
+		});
 }
 
 import { HandlerFunc } from "https://deno.land/x/abc@v1.3.3/types.ts";
@@ -60,9 +61,10 @@ export const socket = async (
 	c:     Context,
 	rooms: Room[],
 ) => {
-	const test: HandlerFunc = async (c) => {
-		const { roomPassword } = await c.body as { roomPassword: string };
+	// get the password user has given
+	const { roomPassword } = await c.body as { roomPassword: string };
 
+	// accept client's websocket connection
 	const {
 		conn,
 		headers,
@@ -76,20 +78,27 @@ export const socket = async (
 		bufWriter,
 	});
 
+	// store references to important stuff
 	const _uuid                    = v4.generate();
 	let   _nickname: string | null = null;
 	let   _room:       Room | null = null;
 	let   userType:    Participant = Participant.Spectator;
 
+	// receive incoming websocket messages
 	for await (const e of ws) {
+		// fails if the JSON can not be parsed
+		// (then it does nothing)
 		try {
 			const data = JSON.parse(e.toString());
 			switch (data.action) {
+				// user is attempting to join a room
 				case "join":
 					let joined_as_player = false;
 					let errors: string[] = [];
 
+					// verify if room is existing
 					let room = is_room(rooms, data.roomId);
+					// [...] if so, check thee credentials given
 					if (
 						room &&
 						(room.password === null || roomPassword === room.password) &&
@@ -98,8 +107,9 @@ export const socket = async (
 						_room = room;
 						_nickname = data.nickname;
 
-						console.log(`User ${_nickname} joined room ${_room.name}`);
+						await println(`User \`${_nickname}\` joined room \`${_room.name}\``);
 
+						// assign a role to the user
 						if (room.player1 == null &&
 							data.participatorType === "player"
 						) {
@@ -122,6 +132,8 @@ export const socket = async (
 						
 						room.sockets.set(_uuid, ws);
 
+						// inform other users that a new client
+						// has joined the room 
 						for (const [uuid, socket] of room.sockets.entries())
 							if (!(_uuid === uuid))
 								socket.send(JSON.stringify({
@@ -131,11 +143,13 @@ export const socket = async (
 								}));
 					}
 
+					// collect errors that might have happened
 					if (!room)
 						errors.push("Room of specified name  was not found.");
 					if (!data.nickname)
 						errors.push("No nickname supplied.");
 
+					// send the response to user sending the `join` request
 					ws.send(JSON.stringify({
 						action: "joinAnswer",
 						success: room && !!data.nickname,
@@ -149,6 +163,8 @@ export const socket = async (
 						} : null,
 					}));
 
+					// if user joined as the second player,
+					// initiate starting game in the room
 					if (
 						joined_as_player &&
 						room &&
@@ -161,6 +177,8 @@ export const socket = async (
 					}
 					break;
 			
+				// allows user to fetch information about
+				// the room they are attempting to join 
 				case "requestRoomInfo":
 					let room_ = is_room(rooms, data.roomId);
 					ws.send(JSON.stringify({
@@ -176,22 +194,76 @@ export const socket = async (
 					}));
 					break;
 
+				// here go all the answers coming from the clients
 				case "questionAnswer":
-					console.log(`${userType} => ${data.answerIndex}`)
-					if (_room?.isGame) {
+					if (_room?.isGame)
 						_room.recdAnswers.set(_uuid, data.answerIndex);
+					break;
+
+				// endpoint allows users to ready up to restart a game
+				// after it has ended
+				case "readyUp":
+					if (!(_room && _room.player1 && _room.player2)) break;
+
+					// if user is player1, set him as ready
+					// and notify player2
+					if (userType == Participant.Player1) {
+						_room.player1.isReady = true;
+
+						_room
+							.sockets
+							.get(_room.player2.uuid)!
+							.send(JSON.stringify({
+								action: "otherPlayerIsReady"
+						}));
 					}
+					// if user is player2, set him as ready
+					// and notify player1
+					else if (userType == Participant.Player2) {
+						_room.player2.isReady = true;
+						_room
+							.sockets
+							.get(_room.player1.uuid)!
+							.send(JSON.stringify({
+								action: "otherPlayerIsReady"
+						}));
+					}
+
+					// if both players are ready, restart the game
+					if (_room.player1.isReady && _room.player2.isReady) {
+						// clean up
+						await println(`Room \`${_room.name}\` is restarting`);
+						_room.player1.score   = 0;
+						_room.player2.score   = 0;
+						_room.player1.isReady = false;
+						_room.player2.isReady = false;
+
+						// notify of the restarting
+						for (const socket of _room.sockets.values())
+							socket.send(JSON.stringify({
+								action: "gameIsRestarting",
+								roomState: {
+									player1: _room.player1,
+									player2: _room.player2,
+									name:    _room.name,
+									spectators: _room.spectators
+								},
+							}));
+
+						// start the game, again
+						_room.isGame          = true;
+						_room.handleGame();
+					}
+					
 					break;
 			}
-		} catch {
-			console.log("bruh", e);
-		}
+		} catch { }
 	}
 
 	// this code is accessed whenever to socket loses connection
 	if (_room && _nickname) {
-		console.log(`User ${_nickname} has disconnected from ${_room.name}`);
-		// stop game
+		await println(`User \`${_nickname}\` has disconnected from \`${_room.name}\``);
+		// stop the game
 		if (
 			_room.player1?.uuid === _uuid ||
 			_room.player2?.uuid === _uuid
@@ -231,6 +303,4 @@ export const socket = async (
 				},
 			}));
 	}
-	}
-	await test(c);
 }

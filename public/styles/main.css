@@ -107,8 +107,15 @@ p {
 	font-family: var(--serif);
 }
 
+.articleHeading {
+	text-align: center;
+	font-size: 1.7rem;
+	margin-bottom: 2em;
+}
+
 .article__section__heading {
 	margin-left: 3em;
+	margin-top:  .5em;
 }
 
 .img_wrapper {
@@ -193,6 +200,7 @@ label {
 
 .btn,
 .btn:focus {
+	display: block;
 	background-image: var(--accent);
 	outline: none !important;
 	border: none;
@@ -200,7 +208,6 @@ label {
 	padding: .3em .7em;
 	margin: 0.7em 0.3em;
 	border-radius: 5px;
-	max-width: 10em;
 }
 
 .rooms {

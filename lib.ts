@@ -1,26 +1,41 @@
 import { WebSocket } from "https://deno.land/x/abc@v1.3.3/vendor/https/deno.land/std/ws/mod.ts";
 import { sleep } from "https://deno.land/x/sleep/mod.ts";
 
-export const println = async (s: string) => 
-    await Deno.stdout.write(new TextEncoder().encode(`${s}\n`));
+// this is rather [...]
+export const println = async (...data: any[]) => 
+    await Deno.stdout.write(new TextEncoder().encode(`${data}\n`));
 
 // represents a player in a lobby
 export class Player {
     public nickname: string;
     public uuid:     string;
     public score:    number;
+    public isReady:  boolean;
 
     constructor(n: string, uuid: string) {
         this.nickname = n;
-        this.score    = 0;
         this.uuid     = uuid;
+        this.score    = 0;
+        this.isReady  = false;
     }
 }
 
 export type uuid = string;
 
-// represents a room/lobby of an instance
-// of an ongoing game
+// these are the categories of questions
+// that can be served
+
+// the number is the exact number
+// assigned to the different  categories
+// by opendtb (which the game is getting
+// questings from) 
+enum QuestionCategory {
+    Mathematics = 19,
+    Computers = 18,
+    ScienceAndNature = 17,
+};
+
+// represents a room/lobby
 export class Room {
     public sockets:       Map<uuid, WebSocket>;
     public recdAnswers:   Map<uuid, number>;
@@ -65,23 +80,31 @@ export class Room {
 
     // handle an on-going game
     async handleGame() {
-        console.log(`Room \`${this.name}\` has started playing.`)
-        for (const [_, socket] of this.sockets.entries()) {
+        await println(`Room \`${this.name}\` has started playing`);
+        // notify users of game starting
+        for (const [_, socket] of this.sockets.entries())
             socket.send(JSON.stringify({
                 action: "gameStarting",
             }));
-        }
 
-        this.questionQueue = await fetchQuestion(20);
-        
+        // load up a queue of 20 questions (number hard-coded on client side)
+        this.questionQueue = await fetchQuestion(7, QuestionCategory.Computers);
+        this.questionQueue =
+            this.questionQueue.concat(await fetchQuestion(7, QuestionCategory.Mathematics));
+        this.questionQueue =
+            this.questionQueue.concat(await fetchQuestion(6, QuestionCategory.ScienceAndNature));
+        this.questionQueue = shuffle(this.questionQueue);
+
         await sleep(5);
         
+        // notify users that the game has started
         for (const [_, socket] of this.sockets.entries()) {
             socket.send(JSON.stringify({
                 action: "gameStarted",
             }));
         }
 
+        // game loop
         while (this.isGame) {
             await this.sendQuestion();
             // give slightly more time than 10 secs
@@ -89,16 +112,18 @@ export class Room {
             // that may occur;
             // (the frontend should still treat
             //  this as 10 secs, though)
-            await sleep(10.7);
+            await sleep(10.1);
             this.evaluateAnswers();
             this.questionQueue.shift();
-
+            // if there is no more questions in the queue
+            // break out of the loop and end the game
             if (this.questionQueue.length === 0)
                 break;
             else 
                 await sleep(10);
         }
 
+        // send information to the users about game ending
         for (const [_, socket] of this.sockets.entries())
             socket.send(JSON.stringify({
                 action: "gameEnded",
@@ -109,12 +134,15 @@ export class Room {
                     spectators: this.spectators
                 }
             }));
+        
+        this.isGame = false;
     }
 
     // calculate the scores
     evaluateAnswers() {
         let results: Map<uuid, boolean> = new Map();
 
+        // check if the answers are correct
         for (let [uuid, answer_idx] of this.recdAnswers.entries()) {
             if (this.player1?.uuid === uuid) {
                 if (this.questionQueue![0].correct_answer_idx == answer_idx) {
@@ -133,6 +161,7 @@ export class Room {
             }
         }
 
+        // notify the users of the results
         for (const [uuid, ws] of this.sockets.entries()) {
             ws.send(JSON.stringify({
                 action: "answerEvaluation",
@@ -175,10 +204,9 @@ export function is_room(
     rooms: Room[],
     roomName: string
 ): Room | false {
-    for (let room of rooms) {
+    for (let room of rooms)
         if (room.name === roomName)
             return room;
-    }
 
     return false;
 }
@@ -202,10 +230,10 @@ export function shuffle(arr: any[]) {
 }
 
 // retrieve questions from an API
-export async function fetchQuestion(amount: number): Promise<Question[]> {
+export async function fetchQuestion(amount: number, cat: QuestionCategory): Promise<Question[]> {
     let num = Math.floor(clamp(amount, 1, 50));
 
-    return await fetch(`https://opentdb.com/api.php?amount=${num}&category=18&type=multiple`, {
+    return await fetch(`https://opentdb.com/api.php?amount=${num}&category=${cat}&type=multiple`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -230,5 +258,3 @@ export async function fetchQuestion(amount: number): Promise<Question[]> {
             return qs;
         });
 }
-
-

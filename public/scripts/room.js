@@ -25,6 +25,7 @@ let client = {
 	userName: null,
 	password: null,
 	curr_chosen_index: null,
+	userType: null
 };
 
 // change colors approprietly when clicking on the answers
@@ -82,7 +83,7 @@ ws.onmessage = async (evt) => {
 			case "answerEvaluation":
 				await handleAnswerEvaluation(data);
 				break;
-			
+
 			case "gameEnded":
 				handleGameEnded(data);
 				break;
@@ -95,10 +96,12 @@ ws.onmessage = async (evt) => {
 				handleSomeoneJoined(data)
 				break;
 
-			// ideally this wouldn't be used
-			// attracts laziness and bloat creation
-			case "RoomStateUpdated":
-				refreshRoomData(data.roomState);
+			case "otherPlayerIsReady":
+				handleOtherPlayerIsReady();
+				break;
+
+			case "gameIsRestarting":
+				handleGameIsRestarting(data);
 				break;
 		}
 	} catch {}
@@ -154,13 +157,16 @@ function handle_connect_modal() {
 
 // run the countdown progress bar below game
 function runTimedProgressBar(duration, color) {
+	bar.style.animation               = "none";
+	bar.offsetHeight;
+	bar.style.animation               = null; 
 	bar.style.width                   = "100%";
 	bar.style.animation               = "loader-animation";
 	bar.style.animationIterationCount = "1";
 	bar.style.fillMode                = "forwards";
 	bar.style.animationTimingFunction = "linear";
 	bar.style.animationDuration       = duration;
-	bar.style.animationPlayState      = 'running';
+	bar.style.animationPlayState      = "running";
 	bar.style.backgroundColor         = color || "var(--accent)";
 	setTimeout(() => {
 		bar.style.width = "0";
@@ -170,7 +176,7 @@ function runTimedProgressBar(duration, color) {
 
 // play a sound by specifying the server path
 function playSound(path){
-	let audio = document.createElement('audio');
+	let audio = document.createElement("audio");
 	audio.style.display = "none";
 	audio.src = path;
 	audio.autoplay = true;
@@ -240,6 +246,15 @@ function sendAnswer() {
 	}));
 }
 
+// used to ready up for a game restart
+function readyUp() {
+	$("gameRestartBtn").innerText = "Restart (1/2 votes)";
+
+	ws.send(JSON.stringify({
+		action: "readyUp",
+	}));
+}
+
 // -----------
 // ws handlers
 // -----------
@@ -266,6 +281,7 @@ function handleGetRoomInfoAnswer(data) {
 // handle response after `joinRoom()`
 function handleJoinAnwer(data) {
 	if (data.success) {
+		client.userType = data.role;
 		refreshRoomData(data.roomState);
 		hideModal();
 	} else
@@ -302,23 +318,33 @@ async function handleQuestion(q, qNum) {
 
 // handle the incoming report about question
 async function handleAnswerEvaluation(data) {
+	// run progress bar n stuff
 	currentEvent.innerText = "The question has been evaluated, take a breather (10 seconds).";
 	runTimedProgressBar("10s", "#0f0");
 
+	// clean up
 	for (let q of questions)
 		q.style.backgroundColor = null;
 
+	$("questionQuestion").innerText = "⠀";
+	for (let q of questions)
+		q.innerText = "⠀";
+
 	client.curr_chosen_index = null;
 
+	// if client is a spectator no more action is needed
+	if (client.userType === "spectator") return;
+	
+	// give feedback based on correctness of answer
 	if (data.evaluation) {
 		playSound("/sounds/answer_correct.wav");
-		$("answerModal").style.backgroundColor = "#00FF0077";
+		$("answerModal").style.backgroundColor = "#00FF0033";
 		currentEvent.innerText = "Correct!";
 		currentEvent.style.color = "#0f0";
 	} else {
 		playSound("/sounds/answer_incorrect.wav");
 		currentEvent.innerHTML = `Wrong. Correct answer was \"${data.correctAnswer}\"`;
-		$("answerModal").style.backgroundColor = "#FF000077";
+		$("answerModal").style.backgroundColor = "#FF000033";
 		currentEvent.style.color = "#f00";
 	}
 	$("answerModal").style.display = "block";
@@ -375,4 +401,28 @@ function handleGameEnded(data) {
 	$("p2name").innerText = data.roomState.player2.nickname;
 	$("p2score").innerText = data.roomState.player2.score;
 	$("scoreboardWrapper").style.display = "flex";
+}
+
+// fires when server sends an information
+// that the other player has readied up
+// to restart the game
+function handleOtherPlayerIsReady() {
+	$("gameRestartBtn").innerText = "Restart (1/2)";
+	$("gameRestartBtn").disabled = "disabled";
+}
+
+// fires when the server sends an information
+// that the game is restarting
+function handleGameIsRestarting(data) {
+	playSound("/sounds/game_restarted.wav");
+	hideModal();
+	$("gameRestartBtn").innerText     = "Restart (0/2)";
+	$("gameRestartBtn").disabled      = null
+	bar.style.animation               = "none";
+	bar.offsetHeight;
+	bar.style.animation               = null;
+	currentEvent.style.color          = "#fff";
+	currentEvent.innerText            = "Room is restarting";
+	refreshRoomData(data.roomState);
+
 }

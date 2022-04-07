@@ -27,7 +27,11 @@
 			</div>
 			<button class="btn" onclick="hideModal()">Close</button>
 			<br>
-			<button class="btn">Restart</button>
+			<button
+				id="gameRestartBtn"
+				class="btn"
+				onclick="readyUp()"
+			>Restart (0/2 votes)</button>
 		</div>
 	</div>
 
@@ -41,7 +45,7 @@
 
 	<nav>
 		<div class="navbar__item" id="createRoom" >Create room</div>
-		<div class="navbar__item"><a href="/">Tutorial</a></div>
+		<div class="navbar__item"><a href="/">About</a></div>
 		<div class="navbar__item" id="browseRooms" >Browse rooms</div>
 	</nav>
 
@@ -54,13 +58,20 @@
 
 	<div class="gameField">
 		<div class="playerStatus playerStatus__player1">
-			<div><img id="player1image" class="grayscale playerImage" src="/img/apu.webp" alt=""></div>
+			<div>
+				<img
+					id="player1image"
+					class="grayscale playerImage"
+					src="/img/apu.webp"
+					alt=""
+				>
+			</div>
 			<div class="playerName" id="player1Name">Not yet joined</div>
 			<div class="playerScore" id="player1Score">0</div>
 		</div>
 		
 		<div class="question">
-			<div class="questionNumber" id="questionNumber">⠀</div>
+			<div id="questionNumber">⠀</div>
 			<div id="questionQuestion">⠀</div>
 			<div class="questionFields">
 				<div class="questionField" id="questionField1">⠀</div>
@@ -71,7 +82,14 @@
 		</div>
 
 		<div class="playerStatus playerStatus__player2">
-			<div><img id="player2image" class="grayscale playerImage" src="/img/upa.webp" alt=""></div>
+			<div>
+				<img
+					id="player2image"
+					class="grayscale playerImage"
+					src="/img/upa.webp"
+					alt=""
+				>
+			</div>
 			<div class="playerName" id="player2Name">Not yet joined</div>
 			<div class="playerScore" id="player2Score">0</div>
 		</div>
