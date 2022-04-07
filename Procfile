@@ -1,1 +1,1 @@
-web: deno run --allow-net --allow-read  main.rs -p=${PORT}
+web: deno run --allow-net --allow-read --allow-env main.ts --port=${PORT}
