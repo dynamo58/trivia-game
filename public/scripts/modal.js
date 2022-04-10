@@ -98,11 +98,8 @@ window.onclick = async function(event) {
 			const roomName   = $("createRoomName").value.toString();
 			let roomPassword = $("createRoomPassword").value.toString();
 
-			if (roomName == "") {
-				alert("Room must have a name.");
-				return;
-			} else if (roomName.includes(" ")) {
-				alert("Room name shall not contain any spaces.");
+			if (roomName == "" || roomName.includes(" ")) {
+				alert("Room must have a name and can't have any spaces.");
 				return;
 			}
 

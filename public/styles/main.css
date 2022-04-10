@@ -24,6 +24,15 @@
 
 * {
 	box-sizing: border-box;
+	-ms-overflow-style: none !important;
+  	scrollbar-width: none !important;
+	overflow-y: scroll !important;
+}
+
+*::-webkit-scrollbar {
+	-ms-overflow-style: none !important;
+  	scrollbar-width: none !important;
+	overflow-y: scroll !important;
 }
 
 body {
@@ -109,11 +118,12 @@ p {
 
 .articleHeading {
 	text-align: center;
-	font-size: 1.7rem;
+	font-size: 2rem;
 	margin-bottom: 2em;
 }
 
 .article__section__heading {
+	font-size: 1.25em;
 	margin-left: 3em;
 	margin-top:  .5em;
 }

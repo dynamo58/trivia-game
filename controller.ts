@@ -36,7 +36,7 @@ export const createRoom = async (c: Context, rooms: Room[]) => {
 	};
 
 	// check again if the requirements are met
-	if (roomName && !roomName.includes(" ")) {
+	if (roomName !== "" && !roomName.includes(" ") && !roomName.includes("%20")) {
 		rooms.push(new Room(roomName, roomPassword));
 		await println(`New room \`${roomName}\` created`);
  
@@ -46,15 +46,13 @@ export const createRoom = async (c: Context, rooms: Room[]) => {
 			roomLocation: `/room/${roomName}`,
 		});
 	} else
-		// the sender did a little trolling
-		// and that's fine
+		// the sender tried to do a little
+		// trolling and that's fine
 		return JSON.stringify({
 			status: 400,
 			message: "You cheeky ...",
 		});
 }
-
-import { HandlerFunc } from "https://deno.land/x/abc@v1.3.3/types.ts";
 
 // socket handler
 export const socket = async (
