@@ -179,7 +179,7 @@ p {
 	font-family: var(--sans-serif);
 }
 
-.modalContent {
+#modalContent {
 	padding: 2em;
 	font-family: var(--sans-serif);
 }
