@@ -28,10 +28,11 @@ deno run --allow-net --allow-read main.ts
 
 <center>
 
-| flag         | description                                                   |
-| ---          | ---                                                           |
-| --allow-net  | allows Deno to access the network (for port binding)          |
-| --allow-read | allows Deno to read local files (to be able to serve content) |
+| flag         | description                                                    |
+| ---          | ---                                                            |
+| --allow-net  | allows Deno to access the network (for port binding)           |
+| --allow-read | allows Deno to read local files (to be able to serve content)  |
+| --allow-env  | allows Deno to read environment variables (for the `PORT` var) |
 
 </center>
 
@@ -39,9 +40,9 @@ deno run --allow-net --allow-read main.ts
 
 <center>
 
-| flag | value type | description           | default |
-| ---  | ---        | ---                   | ---     |
-| -p   | integer    | the port app binds to | 3000    |
+| flag     | value type | description           | default |
+| ---      | ---        | ---                   | ---     |
+| --pprt   | integer    | the port app binds to | 3000    |
 
 </center>
 
@@ -51,7 +52,7 @@ deno run --allow-net --allow-read main.ts
 
 There are multiple options:
 * [Deno's official deploy service](https://deno.com/deploy) (free as of writing this)
-* Compile via `deno compile --allow-net --allow-read main.ts` and deploy somewhere as a binary
+* Compile via `deno compile --allow-net --allow-read --allow-env main.ts` and deploy somewhere as a binary
 * ... or host yourself 🤷
 
 <center><h1>Enjoy!</h1></center>
